@@ -96,38 +96,40 @@ export default function CategoriesManager({
         </Alert>
       )}
 
-      <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      <ul className="divide-y divide-border border-y border-border">
         {categories.map((category) => (
-          <li
-            key={category.id}
-            className="group flex min-h-[148px] flex-col rounded-xl border border-border bg-surface p-5 shadow-sm transition-shadow hover:shadow-md"
-          >
+          <li key={category.id} className="group flex min-h-16 items-center gap-4 py-3">
             {editingId === category.id ? (
-              <form onSubmit={(e) => handleSaveEdit(e, category.id)} className="flex flex-1 flex-col gap-3">
+              <form onSubmit={(e) => handleSaveEdit(e, category.id)} className="flex flex-1 flex-wrap items-center gap-2">
                 <Input
                   aria-label="Category name"
+                  className="min-w-48 flex-1 sm:max-w-sm"
                   value={editingName}
                   onChange={(e) => setEditingName(e.target.value)}
                   onKeyDown={(e) => e.key === "Escape" && setEditingId(null)}
                   autoFocus
                   required
                 />
-                <div className="mt-auto flex gap-2">
-                  <Button type="submit" size="sm" className="flex-1">
-                    Save
-                  </Button>
-                  <Button variant="ghost" size="sm" onClick={() => setEditingId(null)}>
-                    Cancel
-                  </Button>
-                </div>
+                <Button type="submit" size="sm">
+                  Save
+                </Button>
+                <Button variant="ghost" size="sm" onClick={() => setEditingId(null)}>
+                  Cancel
+                </Button>
               </form>
             ) : (
               <>
-                <div className="flex items-start justify-between">
-                  <div className="flex size-10 items-center justify-center rounded-lg bg-primary-soft text-primary-soft-fg">
-                    <Tag className="size-[18px]" strokeWidth={1.75} aria-hidden />
-                  </div>
-                  <div className="flex gap-0.5 opacity-100 transition-opacity sm:opacity-0 sm:group-focus-within:opacity-100 sm:group-hover:opacity-100">
+                <Tag className="size-[18px] shrink-0 text-primary" strokeWidth={1.75} aria-hidden />
+                <p className="min-w-0 flex-1 truncate font-medium text-fg">{category.name}</p>
+                <Link
+                  href={`/admin/items?categoryId=${category.id}`}
+                  className="inline-flex items-center gap-1 text-sm text-fg-muted hover:text-primary"
+                >
+                  <span className="tabular-nums">{category.itemCount}</span>
+                  item{category.itemCount === 1 ? "" : "s"}
+                  <ArrowUpRight className="size-3.5" aria-hidden />
+                </Link>
+                <div className="flex gap-0.5 opacity-100 transition-opacity sm:opacity-0 sm:group-focus-within:opacity-100 sm:group-hover:opacity-100">
                     <Button
                       variant="ghost"
                       size="sm"
@@ -147,30 +149,18 @@ export default function CategoriesManager({
                       disabled={category.itemCount > 0}
                       onClick={() => setDeleting(category)}
                     />
-                  </div>
                 </div>
-                <p className="mt-4 font-semibold text-fg">{category.name}</p>
-                <Link
-                  href={`/admin/items?categoryId=${category.id}`}
-                  className="mt-auto inline-flex items-center gap-1 self-start pt-1 text-sm text-fg-muted hover:text-primary"
-                >
-                  <span className="tabular-nums">{category.itemCount}</span>
-                  item{category.itemCount === 1 ? "" : "s"}
-                  <ArrowUpRight className="size-3.5" aria-hidden />
-                </Link>
               </>
             )}
           </li>
         ))}
 
-        <li>
+        <li className="py-3">
           {adding ? (
-            <form
-              onSubmit={handleAdd}
-              className="flex h-full min-h-[148px] flex-col gap-3 rounded-xl border border-dashed border-primary/40 bg-primary-soft/40 p-5"
-            >
+            <form onSubmit={handleAdd} className="flex flex-wrap items-center gap-2">
               <Input
                 aria-label="New category name"
+                className="min-w-48 flex-1 sm:max-w-sm"
                 placeholder="Category name"
                 value={newName}
                 onChange={(e) => setNewName(e.target.value)}
@@ -183,31 +173,24 @@ export default function CategoriesManager({
                 autoFocus
                 required
               />
-              <div className="mt-auto flex gap-2">
-                <Button type="submit" size="sm" loading={submitting} className="flex-1">
-                  Add
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => {
-                    setAdding(false);
-                    setNewName("");
-                  }}
-                >
-                  Cancel
-                </Button>
-              </div>
+              <Button type="submit" size="sm" loading={submitting}>
+                Add
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setAdding(false);
+                  setNewName("");
+                }}
+              >
+                Cancel
+              </Button>
             </form>
           ) : (
-            <button
-              type="button"
-              onClick={() => setAdding(true)}
-              className="flex h-full min-h-[148px] w-full flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-border-strong text-fg-subtle transition-colors hover:border-primary/50 hover:bg-primary-soft/40 hover:text-primary"
-            >
-              <Plus className="size-5" aria-hidden />
-              <span className="text-sm font-medium">Add category</span>
-            </button>
+            <Button variant="ghost" icon={Plus} onClick={() => setAdding(true)} className="-ml-3 text-primary">
+              Add category
+            </Button>
           )}
         </li>
       </ul>

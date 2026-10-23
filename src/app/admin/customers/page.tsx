@@ -21,7 +21,7 @@ export default async function CustomersPage() {
         description="Customers are added from the POS screen during checkout."
       />
 
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
+      <div className="grid grid-cols-2 gap-x-6 gap-y-8 lg:grid-cols-3">
         <StatCard label="Total customers" value={customers.length} icon={Users} />
         <StatCard label="Total invoices" value={totalInvoices} icon={Receipt} tone="info" />
         <StatCard
@@ -35,7 +35,7 @@ export default async function CustomersPage() {
 
       <div className="mt-8">
         {customers.length === 0 ? (
-          <div className="rounded-xl border border-border bg-surface shadow-sm">
+          <div className="border-t border-border">
             <EmptyState
               icon={Users}
               title="No customers yet"

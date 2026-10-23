@@ -127,7 +127,7 @@ export default function UsersManager({
   }
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] lg:items-start">
+    <div className="grid gap-x-12 gap-y-10 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] lg:items-start">
       <Card>
         <CardHeader title="New employee" description="Employees can use the POS only. They never see cost or profit." />
         <CardBody>
@@ -169,14 +169,14 @@ export default function UsersManager({
 
         <Card>
           <CardHeader title="Team" description={`${users.length} account${users.length === 1 ? "" : "s"}`} />
-          <ul className="mt-4 divide-y divide-border border-t border-border">
+          <ul className="divide-y divide-border">
             {users.map((u) => {
               const isAdmin = u.role === "ADMIN";
               const isSelf = u.id === currentUserId;
 
               if (editingId === u.id) {
                 return (
-                  <li key={u.id} className="bg-surface-2 px-5 py-4">
+                  <li key={u.id} className="-mx-3 rounded-lg bg-surface-2 px-3 py-4">
                     <form onSubmit={(e) => handleSaveEdit(e, u.id)} className="space-y-3">
                       <div className="grid gap-3 sm:grid-cols-2">
                         <Field label="Full name" htmlFor={`edit-name-${u.id}`}>
@@ -224,7 +224,7 @@ export default function UsersManager({
               }
 
               return (
-                <li key={u.id} className="flex items-center gap-3 px-5 py-3.5">
+                <li key={u.id} className="flex items-center gap-3 py-3.5">
                   <div
                     className={cn(
                       "flex size-9 shrink-0 items-center justify-center rounded-full",

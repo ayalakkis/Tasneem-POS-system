@@ -32,7 +32,7 @@ export default async function TodaysInvoicesPage() {
     <div>
       <PageHeader eyebrow="Point of sale" title="Today's invoices" description="Every sale rung up since midnight." />
 
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
+      <div className="grid grid-cols-2 gap-x-6 gap-y-8 lg:grid-cols-3">
         <StatCard hero label="Revenue today" value={totalRevenue.toFixed(2)} icon={Coins} />
         <StatCard label="Sales today" value={invoices.length} icon={Receipt} />
         <StatCard label="Items sold" value={totalItemsSold} icon={ShoppingBasket} tone="info" />
@@ -40,7 +40,7 @@ export default async function TodaysInvoicesPage() {
 
       <div className="mt-8">
         {invoices.length === 0 ? (
-          <div className="rounded-xl border border-border bg-surface shadow-sm">
+          <div className="border-t border-border">
             <EmptyState
               icon={ReceiptText}
               title="No sales yet today"
@@ -71,7 +71,7 @@ export default async function TodaysInvoicesPage() {
                 <TR key={inv.id}>
                   <TD className="tabular-nums">{timeFormat.format(inv.date)}</TD>
                   <TD className={inv.customer ? "font-medium text-fg" : "text-fg-subtle"}>
-                    {inv.customer?.name ?? "Walk-in"}
+                    {inv.customer?.name ?? "Guest"}
                   </TD>
                   <TD numeric>{inv.items.reduce((sum, i) => sum + i.quantity, 0)}</TD>
                   <TD numeric className="font-medium text-fg">

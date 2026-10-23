@@ -37,11 +37,13 @@ export default function CheckoutPanel({
       </div>
 
       <div className="rounded-b-xl border-t border-border bg-surface-2 p-5">
-        <div className="flex items-baseline justify-between">
+        <div className="flex items-end justify-between">
           <span className="text-sm text-fg-muted">
             Total
             {lineCount > 0 && (
-              <span className="text-fg-subtle"> · {lineCount} item{lineCount === 1 ? "" : "s"}</span>
+              <span className="block text-xs text-fg-subtle">
+                {lineCount} item{lineCount === 1 ? "" : "s"}
+              </span>
             )}
           </span>
           <span className="text-[32px] font-semibold leading-none tracking-tight tabular-nums text-fg" aria-live="polite">

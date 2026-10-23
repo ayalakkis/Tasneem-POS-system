@@ -1,13 +1,13 @@
 import type { ComponentProps, ReactNode } from "react";
 import { cn } from "./cn";
 
-export function Card({ className, ...props }: ComponentProps<"div">) {
-  return (
-    <div
-      className={cn("rounded-xl border border-border bg-surface shadow-sm", className)}
-      {...props}
-    />
-  );
+/**
+ * A titled section of a page. Deliberately unboxed: sections are separated by
+ * their headings and spacing, not frames. Boxes are kept for things that are
+ * objects in their own right (checkout panel, dialogs, the invoice paper).
+ */
+export function Card({ className, ...props }: ComponentProps<"section">) {
+  return <section className={cn("min-w-0", className)} {...props} />;
 }
 
 export function CardHeader({
@@ -22,10 +22,10 @@ export function CardHeader({
   className?: string;
 }) {
   return (
-    <div className={cn("flex items-start justify-between gap-4 px-5 pt-5", className)}>
+    <div className={cn("flex items-end justify-between gap-4 border-b border-border pb-3", className)}>
       <div className="min-w-0">
-        <h2 className="text-sm font-semibold text-fg">{title}</h2>
-        {description && <p className="mt-0.5 text-xs text-fg-muted">{description}</p>}
+        <h2 className="text-base font-semibold text-fg">{title}</h2>
+        {description && <p className="mt-0.5 text-sm text-fg-muted">{description}</p>}
       </div>
       {actions && <div className="flex shrink-0 items-center gap-2">{actions}</div>}
     </div>
@@ -33,16 +33,13 @@ export function CardHeader({
 }
 
 export function CardBody({ className, ...props }: ComponentProps<"div">) {
-  return <div className={cn("p-5", className)} {...props} />;
+  return <div className={cn("pt-5", className)} {...props} />;
 }
 
 export function CardFooter({ className, ...props }: ComponentProps<"div">) {
   return (
     <div
-      className={cn(
-        "flex items-center justify-end gap-2 rounded-b-xl border-t border-border bg-surface-2 px-5 py-3",
-        className,
-      )}
+      className={cn("flex items-center justify-end gap-2 border-t border-border pt-4", className)}
       {...props}
     />
   );

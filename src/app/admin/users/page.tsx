@@ -19,7 +19,7 @@ export default async function UsersPage() {
     <div>
       <PageHeader eyebrow="People & orders" title="Users" description="Create, edit and remove staff accounts." />
 
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
+      <div className="grid grid-cols-2 gap-x-6 gap-y-8 lg:grid-cols-3">
         <StatCard label="Total users" value={users.length} icon={UsersRound} />
         <StatCard label="Admins" value={adminCount} icon={ShieldCheck} tone="accent" />
         <StatCard label="Employees" value={employeeCount} icon={UserCog} tone="info" />

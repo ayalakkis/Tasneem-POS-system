@@ -97,9 +97,6 @@ export default function AppShell({
           <LogoMark className="h-8 w-auto text-primary lg:hidden" />
           {current && (
             <p className="hidden truncate text-sm font-medium text-fg-muted sm:block lg:text-fg">
-              <span className="lg:hidden" aria-hidden>
-                ·{" "}
-              </span>
               {current.label}
             </p>
           )}

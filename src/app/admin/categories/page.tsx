@@ -17,12 +17,12 @@ export default async function CategoriesPage() {
     <div>
       <PageHeader eyebrow="Catalog" title="Categories" description="Group items so they're easy to find and report on." />
 
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
+      <div className="grid grid-cols-2 gap-x-6 gap-y-8 lg:grid-cols-3">
         <StatCard label="Categories" value={categories.length} icon={Tags} />
         <StatCard label="Items across categories" value={totalItems} icon={Package} tone="info" />
         <StatCard
           label="Largest category"
-          value={topCategory ? topCategory.name : "—"}
+          value={topCategory ? topCategory.name : "None"}
           icon={Star}
           tone="accent"
           hint={topCategory ? `${topCategory._count.items} items` : undefined}

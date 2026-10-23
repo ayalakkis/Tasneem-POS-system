@@ -3,16 +3,17 @@ import type { ReactNode } from "react";
 import { cn, type BadgeTone } from "@/components/ui";
 
 const ICON_TONES: Record<BadgeTone, string> = {
-  neutral: "bg-surface-3 text-fg-muted",
-  primary: "bg-primary-soft text-primary-soft-fg",
-  accent: "bg-accent-soft text-accent-soft-fg",
-  danger: "bg-danger-soft text-danger-soft-fg",
-  info: "bg-info-soft text-info-soft-fg",
+  neutral: "text-fg-subtle",
+  primary: "text-primary",
+  accent: "text-accent",
+  danger: "text-danger",
+  info: "text-info",
 };
 
 /**
- * KPI tile. `hero` renders it on the brand green for the one number that
- * matters most on a page.
+ * KPI figure, drawn without a box: a hairline on the left, a small label and
+ * a large number. Lay several out in a grid; the rules line them up as columns.
+ * `hero` marks the one number that matters most (green rule, green figure).
  */
 export default function StatCard({
   label,
@@ -26,38 +27,25 @@ export default function StatCard({
   value: string | number;
   icon: LucideIcon;
   tone?: BadgeTone;
-  /** Small line under the value, e.g. "vs. last week". */
+  /** Small line under the value, e.g. "At cost price". */
   hint?: ReactNode;
   hero?: boolean;
 }) {
   return (
-    <div
-      className={cn(
-        "relative overflow-hidden rounded-xl border p-5",
-        hero
-          ? // Brand green in both themes (the sidebar token goes near-black in dark).
-            "border-transparent bg-green-800 text-stone-50 shadow-md"
-          : "border-border bg-surface text-fg shadow-sm",
-      )}
-    >
-      {hero && (
-        <div aria-hidden className="absolute -right-10 -top-12 size-40 rounded-full bg-accent/25 blur-3xl" />
-      )}
-      <div className="relative flex items-center justify-between gap-3">
-        <p className={cn("text-[13px] font-medium", hero ? "text-green-100/75" : "text-fg-muted")}>{label}</p>
-        <div
-          className={cn(
-            "flex size-8 shrink-0 items-center justify-center rounded-lg",
-            hero ? "bg-white/10 text-accent" : ICON_TONES[tone],
-          )}
-        >
-          <Icon className="size-4" strokeWidth={1.75} aria-hidden />
-        </div>
-      </div>
-      <p className="relative mt-3 text-[28px] font-semibold leading-none tracking-tight tabular-nums">{value}</p>
-      {hint && (
-        <p className={cn("relative mt-2 text-xs", hero ? "text-green-100/75" : "text-fg-subtle")}>{hint}</p>
-      )}
+    <div className={cn("min-w-0 border-l-2 py-1 pl-4", hero ? "border-primary" : "border-border")}>
+      <p className="flex items-center gap-1.5 text-[13px] font-medium text-fg-muted">
+        <Icon className={cn("size-3.5 shrink-0", ICON_TONES[hero ? "primary" : tone])} strokeWidth={2} aria-hidden />
+        <span className="truncate">{label}</span>
+      </p>
+      <p
+        className={cn(
+          "mt-2 truncate text-[28px] font-semibold leading-none tracking-tight tabular-nums",
+          hero ? "text-primary" : "text-fg",
+        )}
+      >
+        {value}
+      </p>
+      {hint && <p className="mt-1.5 truncate text-xs text-fg-subtle">{hint}</p>}
     </div>
   );
 }

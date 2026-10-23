@@ -57,7 +57,7 @@ export default async function ItemsPage({
         }
       />
 
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-x-6 gap-y-8 lg:grid-cols-4">
         <StatCard label="Total items" value={allItems.length} icon={Package} />
         <StatCard label="Units in stock" value={totalStock} icon={Boxes} tone="info" />
         <StatCard
@@ -70,7 +70,7 @@ export default async function ItemsPage({
       </div>
 
       {allItems.length === 0 ? (
-        <div className="mt-6 rounded-xl border border-border bg-surface shadow-sm">
+        <div className="mt-6 border-t border-border">
           <EmptyState
             icon={Package}
             title="No items yet"
@@ -107,7 +107,7 @@ export default async function ItemsPage({
                 <TR key={item.id}>
                   <TD className="font-medium text-fg">{item.name}</TD>
                   <TD>{item.category.name}</TD>
-                  <TD className="tabular-nums text-fg-subtle">{item.barcode ?? "—"}</TD>
+                  <TD className="tabular-nums text-fg-subtle">{item.barcode ?? ""}</TD>
                   <TD numeric>{item.costPrice.toFixed(2)}</TD>
                   <TD numeric className="font-medium text-fg">
                     {item.sellingPrice.toFixed(2)}

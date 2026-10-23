@@ -101,7 +101,7 @@ export default async function InvoicePage({
             </div>
             <div className="text-right">
               <dt className="text-xs text-stone-500">Customer</dt>
-              <dd className="mt-0.5 font-medium">{invoice.customer?.name ?? "Walk-in customer"}</dd>
+              <dd className="mt-0.5 font-medium">{invoice.customer?.name ?? "Guest"}</dd>
               {invoice.customer && <dd className="tabular-nums text-stone-600">{invoice.customer.phone}</dd>}
             </div>
           </dl>

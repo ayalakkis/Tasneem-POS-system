@@ -63,7 +63,7 @@ export default function DeliveryTable({ deliveries }: { deliveries: DeliveryList
 
   if (deliveries.length === 0) {
     return (
-      <div className="rounded-xl border border-border bg-surface shadow-sm">
+      <div className="border-t border-border">
         <EmptyState
           icon={Truck}
           title="No delivery orders yet"
@@ -105,7 +105,7 @@ export default function DeliveryTable({ deliveries }: { deliveries: DeliveryList
               <TR key={d.id}>
                 <TD className="whitespace-nowrap tabular-nums">{dateFormat.format(d.date)}</TD>
                 <TD>
-                  <p className="font-medium text-fg">{d.customer?.name ?? "—"}</p>
+                  <p className="font-medium text-fg">{d.customer?.name ?? "Guest"}</p>
                   {d.customer?.phone && <p className="text-xs tabular-nums text-fg-subtle">{d.customer.phone}</p>}
                 </TD>
                 <TD className="max-w-[16rem] truncate" title={d.deliveryAddress ?? undefined}>

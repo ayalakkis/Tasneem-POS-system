@@ -46,12 +46,12 @@ export default async function CustomerDetailPage({
         }
       />
 
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
+      <div className="grid grid-cols-2 gap-x-6 gap-y-8 lg:grid-cols-3">
         <StatCard label="Invoices" value={invoices.length} icon={Receipt} />
         <StatCard label="Lifetime spend" value={lifetime.toFixed(2)} icon={Wallet} tone="accent" />
         <StatCard
           label="Last visit"
-          value={invoices[0] ? dateFormat.format(invoices[0].date) : "—"}
+          value={invoices[0] ? dateFormat.format(invoices[0].date) : "Never"}
           icon={CalendarClock}
           tone="info"
         />
@@ -59,7 +59,7 @@ export default async function CustomerDetailPage({
 
       <h2 className="mb-3 mt-10 text-sm font-semibold text-fg">Purchase history</h2>
       {invoices.length === 0 ? (
-        <div className="rounded-xl border border-border bg-surface shadow-sm">
+        <div className="border-t border-border">
           <EmptyState icon={ReceiptText} title="No invoices yet" />
         </div>
       ) : (

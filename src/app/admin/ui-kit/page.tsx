@@ -97,7 +97,7 @@ export default function UiKitPage() {
             <Input id="kit-price" type="number" defaultValue="0" invalid />
           </Field>
           <Field label="Notes" htmlFor="kit-notes" optional className="sm:col-span-2">
-            <Textarea id="kit-notes" placeholder="اسم المنتج بالعربية — Arabic renders in the same font" />
+            <Textarea id="kit-notes" placeholder="اسم المنتج بالعربية. Arabic renders in the same font" />
           </Field>
         </CardBody>
         <CardFooter>
@@ -121,7 +121,7 @@ export default function UiKitPage() {
           <Badge tone="info" dot>Out for delivery</Badge>
           <Badge tone="accent" dot>Pending</Badge>
           <Badge tone="danger" dot>Cancelled</Badge>
-          <Badge tone="accent">Low stock · 3</Badge>
+          <Badge tone="accent">Low stock: 3</Badge>
         </CardBody>
       </Card>
 
@@ -137,7 +137,7 @@ export default function UiKitPage() {
         </THead>
         <TBody>
           {[
-            ["Prayer mat — velvet", "Prayer items", 25, 14],
+            ["Velvet prayer mat", "Prayer items", 25, 14],
             ["مصحف شريف", "Books", 18.5, 3],
             ["Oud perfume 12ml", "Perfumes", 40, 0],
           ].map(([name, cat, price, stock]) => (
@@ -161,7 +161,7 @@ export default function UiKitPage() {
         <TBody><TableEmpty colSpan={2}>No customers match “Ahmad”.</TableEmpty></TBody>
       </Table>
 
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-x-6 gap-y-8 lg:grid-cols-4">
         <StatCard hero label="Profit today" value="412.50" icon={Clock} hint="12 sales" />
         <StatCard label="This week" value="1,904.00" icon={CalendarDays} />
         <StatCard label="Low stock" value="3" icon={PackageOpen} tone="danger" />

@@ -119,7 +119,7 @@ export default function ItemSearchAndCart({
                       <span className="block truncate font-medium text-fg">{item.name}</span>
                       <span className="block truncate text-xs text-fg-subtle">
                         {item.category.name}
-                        {item.barcode && <span className="tabular-nums"> · {item.barcode}</span>}
+                        {item.barcode && <span className="ml-3 tabular-nums">{item.barcode}</span>}
                       </span>
                     </span>
                     {out ? (
@@ -141,12 +141,12 @@ export default function ItemSearchAndCart({
         )}
       </div>
 
-      <section aria-label="Cart" className="rounded-xl border border-border bg-surface shadow-sm">
-        <div className="flex items-center justify-between border-b border-border px-5 py-3.5">
+      <section aria-label="Cart" className="pt-2">
+        <div className="flex items-center justify-between border-b border-border-strong pb-3">
           <h2 className="text-sm font-semibold text-fg">Cart</h2>
           {cart.length > 0 && (
             <span className="text-xs tabular-nums text-fg-muted">
-              {units} unit{units === 1 ? "" : "s"} · {cart.length} line{cart.length === 1 ? "" : "s"}
+              {units} unit{units === 1 ? "" : "s"} in {cart.length} line{cart.length === 1 ? "" : "s"}
             </span>
           )}
         </div>
@@ -161,7 +161,7 @@ export default function ItemSearchAndCart({
         ) : (
           <ul className="divide-y divide-border">
             {cart.map((line) => (
-              <li key={line.itemId} className="flex flex-wrap items-center gap-x-4 gap-y-2 px-5 py-3">
+              <li key={line.itemId} className="flex flex-wrap items-center gap-x-4 gap-y-2 py-3">
                 <div className="min-w-0 flex-1 basis-40">
                   <p className="truncate font-medium text-fg">{line.name}</p>
                   <p className="text-xs tabular-nums text-fg-subtle">{line.sellingPrice.toFixed(2)} each</p>

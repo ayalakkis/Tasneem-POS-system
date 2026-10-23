@@ -28,7 +28,7 @@ export default async function AdminDashboardPage() {
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-12">
       <PageHeader
         eyebrow={todayLabel}
         title="Dashboard"
@@ -41,21 +41,21 @@ export default async function AdminDashboardPage() {
         className="mb-2"
       />
 
-      <section aria-label="Profit" className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+      <section aria-label="Profit" className="grid grid-cols-2 gap-x-6 gap-y-8 lg:grid-cols-4">
         <StatCard hero label="Profit today" value={today.toFixed(2)} icon={Clock} />
         <StatCard label="This week" value={week.toFixed(2)} icon={CalendarDays} />
         <StatCard label="This month" value={month.toFixed(2)} icon={CalendarRange} />
         <StatCard label="This year" value={year.toFixed(2)} icon={TrendingUp} tone="accent" />
       </section>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-x-10 gap-y-12 lg:grid-cols-3">
         <Card className="lg:col-span-2">
           <CardHeader
             title="Profit, last 30 days"
             description="Daily profit across all sales."
             actions={
               <div className="text-right">
-                <p className="text-xs text-fg-subtle">30-day total</p>
+                <p className="text-xs text-fg-subtle">Total</p>
                 <p className="text-sm font-semibold tabular-nums text-fg">{trendTotal.toFixed(2)}</p>
               </div>
             }

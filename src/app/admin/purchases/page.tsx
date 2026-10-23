@@ -40,7 +40,7 @@ export default async function PurchasesPage() {
         description="Recording a purchase increases stock and updates the item's cost price."
       />
 
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
+      <div className="grid grid-cols-2 gap-x-6 gap-y-8 lg:grid-cols-3">
         <StatCard label="Purchases this month" value={thisMonth.length} icon={ShoppingCart} />
         <StatCard label="Units received this month" value={unitsThisMonth} icon={PackagePlus} tone="info" />
         <StatCard label="Spent this month" value={spentThisMonth.toFixed(2)} icon={Wallet} tone="accent" />
@@ -55,7 +55,7 @@ export default async function PurchasesPage() {
 
       <h2 className="mb-3 mt-10 text-sm font-semibold text-fg">History</h2>
       {purchases.length === 0 ? (
-        <div className="rounded-xl border border-border bg-surface shadow-sm">
+        <div className="border-t border-border">
           <EmptyState
             icon={ReceiptText}
             title="No purchases yet"
@@ -85,7 +85,7 @@ export default async function PurchasesPage() {
                 <TD numeric className="font-medium text-fg">
                   {p.totalPaid.toFixed(2)}
                 </TD>
-                <TD>{p.supplier ?? <span className="text-fg-subtle">—</span>}</TD>
+                <TD>{p.supplier ?? ""}</TD>
                 <TD>{p.createdBy.username}</TD>
               </TR>
             ))}

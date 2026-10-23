@@ -107,7 +107,7 @@ export default function PosScreen() {
 
         <CheckoutPanel
           title="Customer"
-          description="Optional. Leave blank for a walk-in sale."
+          description="Optional. Leave blank for a guest sale."
           lineCount={cart.reduce((sum, l) => sum + l.quantity, 0)}
           total={total}
           actionLabel="Complete sale"

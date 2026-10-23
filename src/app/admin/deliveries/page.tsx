@@ -17,7 +17,7 @@ export default async function AdminDeliveriesPage() {
     <div>
       <PageHeader eyebrow="People & orders" title="Deliveries" description="All delivery orders and their status." />
 
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-x-6 gap-y-8 lg:grid-cols-4">
         <StatCard label="Pending" value={counts.PENDING} icon={Timer} tone="accent" />
         <StatCard label="Out for delivery" value={counts.OUT_FOR_DELIVERY} icon={Truck} tone="info" />
         <StatCard label="Delivered" value={counts.DELIVERED} icon={PackageCheck} tone="primary" />

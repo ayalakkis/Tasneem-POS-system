@@ -83,7 +83,7 @@ export default function ItemForm({
   const marginPct = hasPrices ? (margin / price) * 100 : 0;
 
   return (
-    <form onSubmit={handleSubmit} className="grid max-w-4xl gap-6 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
+    <form onSubmit={handleSubmit} className="grid max-w-4xl gap-x-10 gap-y-8 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
       {error && <Alert tone="danger" className="lg:col-span-2">{error}</Alert>}
 
       <Card>
@@ -156,11 +156,11 @@ export default function ItemForm({
             </Field>
           </div>
 
-          <dl className="space-y-2 rounded-lg bg-surface-2 px-4 py-3 text-sm">
+          <dl className="space-y-2 border-t border-border pt-4 text-sm">
             <div className="flex items-center justify-between">
               <dt className="text-fg-muted">Margin per unit</dt>
               <dd className={cn("font-semibold tabular-nums", hasPrices && margin < 0 ? "text-danger" : "text-fg")}>
-                {hasPrices ? margin.toFixed(2) : "—"}
+                {hasPrices ? margin.toFixed(2) : <span className="font-normal text-fg-subtle">Not set</span>}
               </dd>
             </div>
             <div className="flex items-center justify-between">
@@ -171,7 +171,7 @@ export default function ItemForm({
                     {marginPct.toFixed(0)}%
                   </Badge>
                 ) : (
-                  <span className="text-fg-subtle">—</span>
+                  <span className="text-fg-subtle">Not set</span>
                 )}
               </dd>
             </div>
@@ -188,7 +188,7 @@ export default function ItemForm({
         </CardBody>
       </Card>
 
-      <CardFooter className="rounded-xl border lg:col-span-2">
+      <CardFooter className="lg:col-span-2">
         <Button variant="ghost" onClick={() => router.push("/admin/items")}>
           Cancel
         </Button>
