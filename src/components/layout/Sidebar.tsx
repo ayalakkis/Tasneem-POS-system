@@ -16,6 +16,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { SHOP_NAME } from "@/lib/config";
+import { LogoMark } from "@/components/brand/Logo";
 
 export const ICONS = {
   dashboard: LayoutDashboard,
@@ -41,10 +42,8 @@ export default function Sidebar({ items }: { items: NavItem[] }) {
   return (
     <aside className="flex w-60 shrink-0 flex-col border-r border-gray-200 bg-white">
       <div className="flex items-center gap-2 px-6 py-5">
-        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-babyblue-400 to-babyblue-600 text-sm font-semibold text-white">
-          {(SHOP_NAME || "S").charAt(0).toUpperCase()}
-        </div>
-        <span className="min-h-[1.25rem] text-sm font-semibold text-gray-900">{SHOP_NAME}</span>
+        <LogoMark className="h-11 w-auto text-primary" />
+        {SHOP_NAME && <span className="text-sm font-semibold text-gray-900">{SHOP_NAME}</span>}
       </div>
 
       <nav className="flex-1 space-y-1 px-3">

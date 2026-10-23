@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160">
+  <rect width="160" height="160" rx="36" fill="#1F4E43"/>
+  <path transform="translate(35.3 23.9) scale(0.78)" fill="#F4ECDD" d="M0 62h10v18h-10zM20 50h10v30h-10zM40 50h10v30h-10zM60 50h10v30h-10zM80 50h30v10h-30zM80 60h10v20h-10zM0 70h90v10h-90zM0 90h70v10h-70zM0 100h10v35h-10zM60 100h10v5h-10zM0 105h110v10h-110zM80 90h10v15h-10zM100 90h10v15h-10zM0 125h70v10h-70zM88.5 25l8 8-8 8-8-8zM106.5 25l8 8-8 8-8-8zM106.5 67l8 8-8 8-8-8zM88.5 122l8 8-8 8-8-8zM106.5 122l8 8-8 8-8-8zM0 62A60 60 0 0 1 102.43 19.57L95.36 26.64A50 50 0 0 0 10 62z"/>
+</svg>

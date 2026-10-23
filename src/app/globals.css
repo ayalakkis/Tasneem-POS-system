@@ -1,48 +1,341 @@
 @import "tailwindcss";
 
+/*
+ * Visual identity
+ * ---------------
+ * Palette is taken from the shop sign: deep green lettering, a limestone wall,
+ * and the warm brass glow of the backlight.
+ *
+ * Components use the semantic tokens (bg-surface, text-fg-muted, bg-primary...)
+ * so light and dark mode are handled here, not with dark: variants per screen.
+ * Raw scales (green-*, stone-*, brass-*) are for the rare one-off.
+ */
+
+/* ---------- Light theme (default) ---------- */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  color-scheme: light;
+
+  --bg: #f3efe7;
+  --surface: #fffdf9;
+  --surface-2: #f8f5ef;
+  --surface-3: #efe9de;
+  --border: #e5ddcf;
+  --border-strong: #d4c9b6;
+
+  --fg: #1c1a16;
+  --fg-muted: #6b6253;
+  --fg-subtle: #978c7a;
+
+  --primary: #1f4e43;
+  --primary-hover: #183d35;
+  --primary-fg: #fbf8f2;
+  --primary-soft: #e4eee9;
+  --primary-soft-fg: #1f4e43;
+
+  --accent: #b97f31;
+  --accent-soft: #f6ead4;
+  --accent-soft-fg: #7a5021;
+
+  --danger: #b0453a;
+  --danger-hover: #923429;
+  --danger-soft: #f6e2de;
+  --danger-soft-fg: #8e3328;
+
+  --info: #3b6a87;
+  --info-soft: #e2ecf2;
+  --info-soft-fg: #2c536b;
+
+  --ring: #cf9846;
+
+  --sidebar: #173b33;
+  --sidebar-fg: #efe7d8;
+  --sidebar-muted: #9fb5ab;
+  --sidebar-hover: #1f4a40;
+  --sidebar-active: #25574b;
+  --sidebar-border: #24493f;
+
+  --chart-1: #2a6555;
+  --chart-2: #cf9846;
+  --chart-3: #8dbbab;
+  --chart-4: #b0453a;
+  --chart-5: #b7aa95;
+  --chart-grid: #e8e1d5;
+
+  --shadow-sm: 0 1px 2px rgb(40 30 15 / 0.05);
+  --shadow-md: 0 1px 2px rgb(40 30 15 / 0.04), 0 4px 12px -2px rgb(40 30 15 / 0.08);
+  --shadow-lg: 0 2px 4px rgb(40 30 15 / 0.04), 0 16px 40px -8px rgb(40 30 15 / 0.16);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-
-  --color-babyblue-50: #f3f9fc;
-  --color-babyblue-100: #e3f1f8;
-  --color-babyblue-200: #c9e4f0;
-  --color-babyblue-300: #a6d2e4;
-  --color-babyblue-400: #82bfd8;
-  --color-babyblue-500: #5fa8c4;
-  --color-babyblue-600: #3f8aa8;
-  --color-babyblue-700: #316e86;
-  --color-babyblue-800: #27576a;
-  --color-babyblue-900: #1c3f4c;
-
-  --color-beige-50: #fbf8f2;
-  --color-beige-100: #f5efe2;
-  --color-beige-200: #ebe0c9;
-  --color-beige-300: #dccba3;
-  --color-beige-400: #cbb37e;
-  --color-beige-500: #b99c60;
-  --color-beige-600: #a0824c;
-  --color-beige-700: #7d653c;
-  --color-beige-800: #5c4b2d;
-  --color-beige-900: #3d321e;
-}
-
+/* ---------- Dark theme ---------- */
+/*
+ * Follows the OS unless the user picked a theme (data-theme on <html>).
+ * The two blocks below must stay identical: one is the OS preference, the
+ * other the explicit choice. CSS can't combine a media query and a selector.
+ */
 @media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+
+    --bg: #0c1412;
+    --surface: #121d1a;
+    --surface-2: #16231f;
+    --surface-3: #1c2c27;
+    --border: #22332e;
+    --border-strong: #2f443d;
+
+    --fg: #ece6da;
+    --fg-muted: #a59e90;
+    --fg-subtle: #737d77;
+
+    --primary: #5fa88e;
+    --primary-hover: #74b79f;
+    --primary-fg: #0b1e1a;
+    --primary-soft: rgb(95 168 142 / 0.14);
+    --primary-soft-fg: #8fcbb5;
+
+    --accent: #d9a65a;
+    --accent-soft: rgb(217 166 90 / 0.14);
+    --accent-soft-fg: #e5bd80;
+
+    --danger: #e07a6b;
+    --danger-hover: #ea9285;
+    --danger-soft: rgb(224 122 107 / 0.14);
+    --danger-soft-fg: #efa195;
+
+    --info: #7fb0cf;
+    --info-soft: rgb(127 176 207 / 0.14);
+    --info-soft-fg: #a5c8de;
+
+    --ring: #d9a65a;
+
+    --sidebar: #0e1916;
+    --sidebar-fg: #e6dfd1;
+    --sidebar-muted: #7f918a;
+    --sidebar-hover: #15241f;
+    --sidebar-active: #1b2f29;
+    --sidebar-border: #1c2b26;
+
+    --chart-1: #5fa88e;
+    --chart-2: #d9a65a;
+    --chart-3: #2f6b5a;
+    --chart-4: #e07a6b;
+    --chart-5: #6f7a73;
+    --chart-grid: #22332e;
+
+    --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.3);
+    --shadow-md: 0 1px 2px rgb(0 0 0 / 0.3), 0 4px 12px -2px rgb(0 0 0 / 0.35);
+    --shadow-lg: 0 2px 4px rgb(0 0 0 / 0.3), 0 16px 40px -8px rgb(0 0 0 / 0.5);
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --bg: #0c1412;
+  --surface: #121d1a;
+  --surface-2: #16231f;
+  --surface-3: #1c2c27;
+  --border: #22332e;
+  --border-strong: #2f443d;
+
+  --fg: #ece6da;
+  --fg-muted: #a59e90;
+  --fg-subtle: #737d77;
+
+  --primary: #5fa88e;
+  --primary-hover: #74b79f;
+  --primary-fg: #0b1e1a;
+  --primary-soft: rgb(95 168 142 / 0.14);
+  --primary-soft-fg: #8fcbb5;
+
+  --accent: #d9a65a;
+  --accent-soft: rgb(217 166 90 / 0.14);
+  --accent-soft-fg: #e5bd80;
+
+  --danger: #e07a6b;
+  --danger-hover: #ea9285;
+  --danger-soft: rgb(224 122 107 / 0.14);
+  --danger-soft-fg: #efa195;
+
+  --info: #7fb0cf;
+  --info-soft: rgb(127 176 207 / 0.14);
+  --info-soft-fg: #a5c8de;
+
+  --ring: #d9a65a;
+
+  --sidebar: #0e1916;
+  --sidebar-fg: #e6dfd1;
+  --sidebar-muted: #7f918a;
+  --sidebar-hover: #15241f;
+  --sidebar-active: #1b2f29;
+  --sidebar-border: #1c2b26;
+
+  --chart-1: #5fa88e;
+  --chart-2: #d9a65a;
+  --chart-3: #2f6b5a;
+  --chart-4: #e07a6b;
+  --chart-5: #6f7a73;
+  --chart-grid: #22332e;
+
+  --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.3);
+  --shadow-md: 0 1px 2px rgb(0 0 0 / 0.3), 0 4px 12px -2px rgb(0 0 0 / 0.35);
+  --shadow-lg: 0 2px 4px rgb(0 0 0 / 0.3), 0 16px 40px -8px rgb(0 0 0 / 0.5);
+}
+
+/* `dark:` utilities for the rare case a token isn't enough. */
+@custom-variant dark {
+  @media (prefers-color-scheme: dark) {
+    &:where(:root:not([data-theme="light"]) *) {
+      @slot;
+    }
+  }
+  &:where([data-theme="dark"] *) {
+    @slot;
+  }
+}
+
+@theme inline {
+  --font-sans: var(--font-readex), ui-sans-serif, system-ui, sans-serif;
+
+  /* Semantic colors */
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-fg: var(--fg);
+  --color-fg-muted: var(--fg-muted);
+  --color-fg-subtle: var(--fg-subtle);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-fg: var(--primary-fg);
+  --color-primary-soft: var(--primary-soft);
+  --color-primary-soft-fg: var(--primary-soft-fg);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-soft-fg: var(--accent-soft-fg);
+  --color-danger: var(--danger);
+  --color-danger-hover: var(--danger-hover);
+  --color-danger-soft: var(--danger-soft);
+  --color-danger-soft-fg: var(--danger-soft-fg);
+  --color-info: var(--info);
+  --color-info-soft: var(--info-soft);
+  --color-info-soft-fg: var(--info-soft-fg);
+  --color-ring: var(--ring);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-fg: var(--sidebar-fg);
+  --color-sidebar-muted: var(--sidebar-muted);
+  --color-sidebar-hover: var(--sidebar-hover);
+  --color-sidebar-active: var(--sidebar-active);
+  --color-sidebar-border: var(--sidebar-border);
+
+  --shadow-sm: var(--shadow-sm);
+  --shadow-md: var(--shadow-md);
+  --shadow-lg: var(--shadow-lg);
+}
+
+@theme {
+  /* Raw brand scales */
+  --color-green-50: #f0f6f3;
+  --color-green-100: #dcebe5;
+  --color-green-200: #b9d6cb;
+  --color-green-300: #8dbbab;
+  --color-green-400: #5e9c88;
+  --color-green-500: #3c7f6b;
+  --color-green-600: #2a6555;
+  --color-green-700: #1f4e43;
+  --color-green-800: #183d35;
+  --color-green-900: #122e28;
+  --color-green-950: #0b1e1a;
+
+  --color-stone-50: #faf8f4;
+  --color-stone-100: #f3efe7;
+  --color-stone-200: #e8e1d5;
+  --color-stone-300: #d8cebd;
+  --color-stone-400: #b7aa95;
+  --color-stone-500: #918470;
+  --color-stone-600: #6f6453;
+  --color-stone-700: #544b3f;
+  --color-stone-800: #3a342c;
+  --color-stone-900: #25211c;
+  --color-stone-950: #171512;
+
+  --color-brass-50: #fbf5ea;
+  --color-brass-100: #f5e7cc;
+  --color-brass-200: #ebcf9c;
+  --color-brass-300: #ddb26b;
+  --color-brass-400: #cf9846;
+  --color-brass-500: #b97f31;
+  --color-brass-600: #9a6627;
+  --color-brass-700: #7a5021;
+  --color-brass-800: #5c3d1b;
+  --color-brass-900: #3f2a14;
+
+  /*
+   * TEMPORARY: the old palette names now point at the new palette so screens
+   * that haven't been migrated yet still look on-brand. Remove once every
+   * screen uses the semantic tokens.
+   */
+  --color-babyblue-50: #f0f6f3;
+  --color-babyblue-100: #dcebe5;
+  --color-babyblue-200: #b9d6cb;
+  --color-babyblue-300: #8dbbab;
+  --color-babyblue-400: #5e9c88;
+  --color-babyblue-500: #3c7f6b;
+  --color-babyblue-600: #1f4e43;
+  --color-babyblue-700: #1f4e43;
+  --color-babyblue-800: #183d35;
+  --color-babyblue-900: #122e28;
+
+  --color-beige-50: #f3efe7;
+  --color-beige-100: #efe9de;
+  --color-beige-200: #e8e1d5;
+  --color-beige-300: #d8cebd;
+  --color-beige-400: #b7aa95;
+  --color-beige-500: #918470;
+  --color-beige-600: #6f6453;
+  --color-beige-700: #544b3f;
+  --color-beige-800: #3a342c;
+  --color-beige-900: #25211c;
+
+  --color-gray-50: #faf8f4;
+  --color-gray-100: #f3efe7;
+  --color-gray-200: #e5ddcf;
+  --color-gray-300: #d4c9b6;
+  --color-gray-400: #b7aa95;
+  --color-gray-500: #8a7f6d;
+  --color-gray-600: #6b6253;
+  --color-gray-700: #4f473b;
+  --color-gray-800: #3a342c;
+  --color-gray-900: #1c1a16;
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--font-sans);
+    font-feature-settings: "ss01", "cv11";
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  ::selection {
+    background: color-mix(in srgb, var(--accent) 30%, transparent);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-strong) transparent;
+  }
 }
