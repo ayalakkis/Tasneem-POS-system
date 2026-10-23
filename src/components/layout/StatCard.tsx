@@ -29,8 +29,6 @@ export default function StatCard({
   /** Small line under the value, e.g. "vs. last week". */
   hint?: ReactNode;
   hero?: boolean;
-  /** @deprecated Old Tailwind color classes; ignored. Use `tone`. */
-  color?: string;
 }) {
   return (
     <div

@@ -1,8 +1,41 @@
 import { notFound } from "next/navigation";
+import { MapPin } from "lucide-react";
+import type { DeliveryStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { requirePageUser } from "@/lib/auth";
 import { SHOP_NAME } from "@/lib/config";
+import { LogoMark } from "@/components/brand/Logo";
+import { DELIVERY_STATUS_LABELS } from "@/components/DeliveryStatusBadge";
 import InvoiceToolbar from "./InvoiceToolbar";
+
+// The receipt is a printed document, so the "paper" uses fixed light brand
+// colors (raw stone/green scales) instead of theme tokens: it looks the same
+// on screen in dark mode as it does on paper.
+const STATUS_PILL: Record<DeliveryStatus, string> = {
+  PENDING: "bg-brass-100 text-brass-800",
+  OUT_FOR_DELIVERY: "bg-[#e2ecf2] text-[#2c536b]",
+  DELIVERED: "bg-green-100 text-green-800",
+  CANCELLED: "bg-[#f6e2de] text-[#8e3328]",
+};
+
+const dateFormat = new Intl.DateTimeFormat("en-GB", {
+  day: "numeric",
+  month: "long",
+  year: "numeric",
+  hour: "2-digit",
+  minute: "2-digit",
+});
+
+function DiamondRule() {
+  return (
+    <div aria-hidden className="my-6 flex items-center gap-3 text-brass-400">
+      <span className="h-px flex-1 bg-stone-200" />
+      <span className="size-1.5 rotate-45 bg-current" />
+      <span className="size-1.5 rotate-45 bg-current" />
+      <span className="h-px flex-1 bg-stone-200" />
+    </div>
+  );
+}
 
 export default async function InvoicePage({
   params,
@@ -37,88 +70,98 @@ export default async function InvoicePage({
 
   if (!invoice) notFound();
 
+  const number = invoice.id.slice(-8).toUpperCase();
+  const status = invoice.deliveryStatus ?? "PENDING";
+  const units = invoice.items.reduce((sum, l) => sum + l.quantity, 0);
+
   return (
-    <div className="mx-auto max-w-2xl px-6 py-8">
-      <InvoiceToolbar />
+    <div className="min-h-dvh bg-bg print:min-h-0 print:bg-white">
+      <div className="mx-auto max-w-xl px-4 py-8 sm:px-6 print:max-w-none print:p-0">
+        <InvoiceToolbar />
 
-      <div className="rounded-xl border border-gray-200 bg-white p-8 shadow-sm sm:p-10">
-        <div className="mb-6 border-b border-gray-200 pb-5 text-center">
-          <h1 className="min-h-[1.75rem] text-xl font-semibold text-gray-900">{SHOP_NAME}</h1>
-          <p className="mt-1 text-sm text-gray-500">
-            {invoice.isDelivery ? "Delivery Order" : "Sales Invoice"}
-          </p>
-        </div>
+        <article className="relative overflow-hidden rounded-2xl bg-[#fffdf9] px-7 py-9 text-stone-900 shadow-lg ring-1 ring-black/5 sm:px-10 print:rounded-none print:bg-white print:px-0 print:py-0 print:shadow-none print:ring-0">
+          {/* Brand band along the top edge */}
+          <div aria-hidden className="absolute inset-x-0 top-0 h-1.5 bg-green-800 print:hidden" />
 
-        {invoice.isDelivery && (
-          <div className="mb-6 flex items-center justify-between rounded-lg bg-babyblue-50 px-4 py-3 text-sm">
-            <div>
-              <p className="font-medium text-babyblue-900">Deliver to</p>
-              <p className="text-babyblue-700">{invoice.deliveryAddress}</p>
-            </div>
-            <span className="rounded-full bg-white px-3 py-1 text-xs font-medium text-babyblue-700">
-              {invoice.deliveryStatus?.replace(/_/g, " ") ?? "PENDING"}
-            </span>
-          </div>
-        )}
-
-        <div className="mb-6 flex items-start justify-between gap-6 text-sm text-gray-600">
-          <div>
-            <p className="font-medium text-gray-900">
-              Invoice #{invoice.id.slice(-8).toUpperCase()}
+          <header className="flex flex-col items-center text-center">
+            <LogoMark title="Shop logo" className="h-20 w-auto text-green-800" />
+            {SHOP_NAME && <p className="mt-3 text-lg font-semibold">{SHOP_NAME}</p>}
+            <p className="mt-4 text-[11px] font-medium uppercase tracking-[0.2em] text-brass-600">
+              {invoice.isDelivery ? "Delivery order" : "Sales invoice"}
             </p>
-            <p className="mt-0.5">{invoice.date.toLocaleString()}</p>
-          </div>
-          <div className="text-right">
-            {invoice.customer ? (
-              <>
-                <p className="font-medium text-gray-900">{invoice.customer.name}</p>
-                <p className="mt-0.5">{invoice.customer.phone}</p>
-              </>
-            ) : (
-              <p className="font-medium text-gray-900">Walk-in customer</p>
-            )}
-          </div>
-        </div>
+            <p className="mt-1 text-sm tabular-nums text-stone-500">No. {number}</p>
+          </header>
 
-        <table className="w-full border-collapse text-sm">
-          <thead>
-            <tr className="border-b border-gray-200 text-left text-xs uppercase tracking-wide text-gray-500">
-              <th className="py-2 pr-3">Item</th>
-              <th className="w-16 py-2 pr-3 text-right">Qty</th>
-              <th className="w-24 py-2 pr-3 text-right">Price</th>
-              <th className="w-24 py-2 text-right">Subtotal</th>
-            </tr>
-          </thead>
-          <tbody>
-            {invoice.items.map((line) => (
-              <tr key={line.id} className="border-b border-gray-100">
-                <td className="py-3 pr-3">{line.item.name}</td>
-                <td className="py-3 pr-3 text-right tabular-nums text-gray-600">
-                  {line.quantity}
-                </td>
-                <td className="py-3 pr-3 text-right tabular-nums text-gray-600">
-                  {line.unitPrice.toFixed(2)}
-                </td>
-                <td className="py-3 text-right tabular-nums font-medium text-gray-900">
-                  {line.subtotal.toFixed(2)}
-                </td>
+          <DiamondRule />
+
+          <dl className="grid grid-cols-2 gap-x-6 gap-y-4 text-sm">
+            <div>
+              <dt className="text-xs text-stone-500">Date</dt>
+              <dd className="mt-0.5 font-medium tabular-nums">{dateFormat.format(invoice.date)}</dd>
+            </div>
+            <div className="text-right">
+              <dt className="text-xs text-stone-500">Customer</dt>
+              <dd className="mt-0.5 font-medium">{invoice.customer?.name ?? "Walk-in customer"}</dd>
+              {invoice.customer && <dd className="tabular-nums text-stone-600">{invoice.customer.phone}</dd>}
+            </div>
+          </dl>
+
+          {invoice.isDelivery && (
+            <div className="mt-5 flex items-start gap-3 rounded-xl bg-stone-100 px-4 py-3 text-sm print:border print:border-stone-300 print:bg-transparent">
+              <MapPin className="mt-0.5 size-4 shrink-0 text-green-700" aria-hidden />
+              <div className="min-w-0 flex-1">
+                <p className="text-xs text-stone-500">Deliver to</p>
+                <p className="font-medium">{invoice.deliveryAddress}</p>
+              </div>
+              <span className={`shrink-0 rounded-full px-2.5 py-0.5 text-xs font-medium ${STATUS_PILL[status]}`}>
+                {DELIVERY_STATUS_LABELS[status]}
+              </span>
+            </div>
+          )}
+
+          <table className="mt-7 w-full border-collapse text-sm">
+            <thead>
+              <tr className="border-b border-stone-300 text-[11px] uppercase tracking-[0.08em] text-stone-500">
+                <th scope="col" className="pb-2 pr-3 text-left font-medium">Item</th>
+                <th scope="col" className="w-12 pb-2 pr-3 text-right font-medium">Qty</th>
+                <th scope="col" className="w-20 pb-2 pr-3 text-right font-medium">Price</th>
+                <th scope="col" className="w-24 pb-2 text-right font-medium">Amount</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {invoice.items.map((line) => (
+                <tr key={line.id} className="border-b border-dashed border-stone-200">
+                  <td className="py-3 pr-3 font-medium">{line.item.name}</td>
+                  <td className="py-3 pr-3 text-right tabular-nums text-stone-600">{line.quantity}</td>
+                  <td className="py-3 pr-3 text-right tabular-nums text-stone-600">{line.unitPrice.toFixed(2)}</td>
+                  <td className="py-3 text-right font-medium tabular-nums">{line.subtotal.toFixed(2)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
 
-        <div className="mt-4 flex justify-end">
-          <div className="w-56 rounded-lg bg-beige-50 px-4 py-3">
-            <div className="flex justify-between text-sm font-semibold text-gray-900">
-              <span>Total</span>
-              <span className="tabular-nums">{invoice.totalAmount.toFixed(2)}</span>
+          <div className="mt-5 flex items-end justify-between gap-4">
+            <p className="text-xs text-stone-500 tabular-nums">
+              {units} item{units === 1 ? "" : "s"}
+            </p>
+            <div className="text-right">
+              <p className="text-xs uppercase tracking-[0.12em] text-stone-500">Total</p>
+              <p className="mt-1 text-3xl font-semibold tracking-tight tabular-nums text-green-800">
+                {invoice.totalAmount.toFixed(2)}
+              </p>
             </div>
           </div>
-        </div>
 
-        <p className="mt-8 text-center text-xs text-gray-400">
-          Served by {invoice.createdBy.username}
-        </p>
+          <DiamondRule />
+
+          <footer className="text-center">
+            <p lang="ar" dir="rtl" className="text-base font-medium text-green-800">
+              شكراً لزيارتكم
+            </p>
+            <p className="mt-1 text-xs text-stone-500">Thank you for your visit</p>
+            <p className="mt-4 text-[11px] text-stone-400">Served by {invoice.createdBy.username}</p>
+          </footer>
+        </article>
       </div>
     </div>
   );

@@ -23,8 +23,9 @@
   --border-strong: #d4c9b6;
 
   --fg: #1c1a16;
-  --fg-muted: #6b6253;
-  --fg-subtle: #978c7a;
+  --fg-muted: #574f43;
+  /* Text tokens clear WCAG AA 4.5:1 on every surface, incl. small hint text. */
+  --fg-subtle: #70685a;
 
   --primary: #1f4e43;
   --primary-hover: #183d35;
@@ -88,7 +89,7 @@
 
     --fg: #ece6da;
     --fg-muted: #a59e90;
-    --fg-subtle: #737d77;
+    --fg-subtle: #8a918a;
 
     --primary: #5fa88e;
     --primary-hover: #74b79f;
@@ -146,7 +147,7 @@
 
   --fg: #ece6da;
   --fg-muted: #a59e90;
-  --fg-subtle: #737d77;
+  --fg-subtle: #8a918a;
 
   --primary: #5fa88e;
   --primary-hover: #74b79f;
@@ -286,44 +287,36 @@
   --color-brass-700: #7a5021;
   --color-brass-800: #5c3d1b;
   --color-brass-900: #3f2a14;
+}
 
-  /*
-   * TEMPORARY: the old palette names now point at the new palette so screens
-   * that haven't been migrated yet still look on-brand. Remove once every
-   * screen uses the semantic tokens.
-   */
-  --color-babyblue-50: #f0f6f3;
-  --color-babyblue-100: #dcebe5;
-  --color-babyblue-200: #b9d6cb;
-  --color-babyblue-300: #8dbbab;
-  --color-babyblue-400: #5e9c88;
-  --color-babyblue-500: #3c7f6b;
-  --color-babyblue-600: #1f4e43;
-  --color-babyblue-700: #1f4e43;
-  --color-babyblue-800: #183d35;
-  --color-babyblue-900: #122e28;
+@media print {
+  @page {
+    margin: 14mm;
+  }
 
-  --color-beige-50: #f3efe7;
-  --color-beige-100: #efe9de;
-  --color-beige-200: #e8e1d5;
-  --color-beige-300: #d8cebd;
-  --color-beige-400: #b7aa95;
-  --color-beige-500: #918470;
-  --color-beige-600: #6f6453;
-  --color-beige-700: #544b3f;
-  --color-beige-800: #3a342c;
-  --color-beige-900: #25211c;
+  /* Receipts print on white whatever the screen theme is. */
+  html,
+  body {
+    background: #fff !important;
+    color: #1c1a16 !important;
+    color-scheme: light;
+  }
 
-  --color-gray-50: #faf8f4;
-  --color-gray-100: #f3efe7;
-  --color-gray-200: #e5ddcf;
-  --color-gray-300: #d4c9b6;
-  --color-gray-400: #b7aa95;
-  --color-gray-500: #8a7f6d;
-  --color-gray-600: #6b6253;
-  --color-gray-700: #4f473b;
-  --color-gray-800: #3a342c;
-  --color-gray-900: #1c1a16;
+  * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 @keyframes dialog-in {
