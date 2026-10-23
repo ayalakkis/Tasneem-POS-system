@@ -1,7 +1,9 @@
-import Link from "next/link";
-import { Receipt, Coins, ShoppingBasket } from "lucide-react";
+import { Receipt, Coins, ShoppingBasket, ReceiptText, ShoppingBag } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import StatCard from "@/components/layout/StatCard";
+import { EmptyState, LinkButton, PageHeader, Table, TBody, TD, TH, THead, TR } from "@/components/ui";
+
+const timeFormat = new Intl.DateTimeFormat("en-GB", { hour: "2-digit", minute: "2-digit" });
 
 export default async function TodaysInvoicesPage() {
   const startOfDay = new Date();
@@ -28,65 +30,64 @@ export default async function TodaysInvoicesPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-semibold text-gray-900">Today&apos;s invoices</h1>
-      <p className="mt-1 text-sm text-gray-500">Sales rung up today.</p>
+      <PageHeader eyebrow="Point of sale" title="Today's invoices" description="Every sale rung up since midnight." />
 
-      <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
+        <StatCard hero label="Revenue today" value={totalRevenue.toFixed(2)} icon={Coins} />
         <StatCard label="Sales today" value={invoices.length} icon={Receipt} />
-        <StatCard
-          label="Revenue today"
-          value={totalRevenue.toFixed(2)}
-          icon={Coins}
-          color="bg-beige-100 text-beige-700"
-        />
-        <StatCard
-          label="Items sold"
-          value={totalItemsSold}
-          icon={ShoppingBasket}
-          color="bg-babyblue-200 text-babyblue-800"
-        />
+        <StatCard label="Items sold" value={totalItemsSold} icon={ShoppingBasket} tone="info" />
       </div>
 
-      <div className="mt-6 overflow-x-auto rounded-xl border border-gray-200 bg-white shadow-sm">
-        <table className="min-w-full divide-y divide-gray-200 text-sm">
-          <thead>
-            <tr className="text-left text-xs font-medium uppercase tracking-wide text-gray-500">
-              <th className="px-4 py-3">Time</th>
-              <th className="px-4 py-3">Customer</th>
-              <th className="px-4 py-3">Items</th>
-              <th className="px-4 py-3">Total</th>
-              <th className="px-4 py-3">Rung up by</th>
-              <th className="px-4 py-3"></th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-200">
-            {invoices.map((inv) => (
-              <tr key={inv.id}>
-                <td className="px-4 py-3 text-gray-600">
-                  {inv.date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                </td>
-                <td className="px-4 py-3 text-gray-600">{inv.customer?.name ?? "Walk-in"}</td>
-                <td className="px-4 py-3 text-gray-600">
-                  {inv.items.reduce((sum, i) => sum + i.quantity, 0)} item(s)
-                </td>
-                <td className="px-4 py-3 text-gray-600">{inv.totalAmount.toFixed(2)}</td>
-                <td className="px-4 py-3 text-gray-600">{inv.createdBy.username}</td>
-                <td className="px-4 py-3 text-right">
-                  <Link href={`/invoices/${inv.id}`} className="text-gray-600 hover:underline">
-                    View / print
-                  </Link>
-                </td>
-              </tr>
-            ))}
-            {invoices.length === 0 && (
-              <tr>
-                <td colSpan={6} className="px-4 py-6 text-center text-gray-400">
-                  No sales yet today.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+      <div className="mt-8">
+        {invoices.length === 0 ? (
+          <div className="rounded-xl border border-border bg-surface shadow-sm">
+            <EmptyState
+              icon={ReceiptText}
+              title="No sales yet today"
+              description="Completed sales show up here so you can reprint a receipt."
+              action={
+                <LinkButton href="/pos" icon={ShoppingBag}>
+                  Start a sale
+                </LinkButton>
+              }
+            />
+          </div>
+        ) : (
+          <Table>
+            <THead>
+              <TR>
+                <TH>Time</TH>
+                <TH>Customer</TH>
+                <TH numeric>Items</TH>
+                <TH numeric>Total</TH>
+                <TH>Rung up by</TH>
+                <TH>
+                  <span className="sr-only">Actions</span>
+                </TH>
+              </TR>
+            </THead>
+            <TBody>
+              {invoices.map((inv) => (
+                <TR key={inv.id}>
+                  <TD className="tabular-nums">{timeFormat.format(inv.date)}</TD>
+                  <TD className={inv.customer ? "font-medium text-fg" : "text-fg-subtle"}>
+                    {inv.customer?.name ?? "Walk-in"}
+                  </TD>
+                  <TD numeric>{inv.items.reduce((sum, i) => sum + i.quantity, 0)}</TD>
+                  <TD numeric className="font-medium text-fg">
+                    {inv.totalAmount.toFixed(2)}
+                  </TD>
+                  <TD>{inv.createdBy.username}</TD>
+                  <TD className="w-px text-right">
+                    <LinkButton href={`/invoices/${inv.id}`} variant="ghost" size="sm" icon={ReceiptText}>
+                      View / print
+                    </LinkButton>
+                  </TD>
+                </TR>
+              ))}
+            </TBody>
+          </Table>
+        )}
       </div>
     </div>
   );
