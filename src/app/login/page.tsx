@@ -1,88 +1,47 @@
-"use client";
+import { LogoMark } from "@/components/brand/Logo";
+import { ArchFrame, Diamond } from "@/components/brand/Motifs";
+import ThemeToggle from "@/components/ThemeToggle";
+import { getTheme } from "@/lib/theme-server";
+import LoginForm from "./LoginForm";
 
-import { useState, type FormEvent } from "react";
-import { useRouter } from "next/navigation";
-import { SHOP_NAME } from "@/lib/config";
-
-export default function LoginPage() {
-  const router = useRouter();
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const [submitting, setSubmitting] = useState(false);
-
-  async function handleSubmit(e: FormEvent) {
-    e.preventDefault();
-    setError(null);
-    setSubmitting(true);
-
-    const res = await fetch("/api/auth/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, password }),
-    });
-
-    if (!res.ok) {
-      const data = await res.json().catch(() => ({}));
-      setError(data.error ?? "Login failed");
-      setSubmitting(false);
-      return;
-    }
-
-    const data = await res.json();
-    router.push(data.role === "ADMIN" ? "/admin" : "/pos");
-    router.refresh();
-  }
+export default async function LoginPage() {
+  const theme = await getTheme();
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-beige-50 px-4">
-      <form
-        onSubmit={handleSubmit}
-        className="w-full max-w-sm rounded-lg border border-gray-200 bg-white p-8 shadow-sm"
-      >
-        <h1 className="mb-1 min-h-[1.75rem] text-xl font-semibold text-gray-900">
-          {SHOP_NAME}
-        </h1>
-        <p className="mb-6 text-sm text-gray-500">Sign in to continue</p>
-
-        {error && (
-          <div className="mb-4 rounded-lg bg-beige-100 px-3 py-2 text-sm text-beige-900">
-            {error}
-          </div>
-        )}
-
-        <label htmlFor="username" className="mb-1 block text-sm font-medium text-gray-700">
-          Username
-        </label>
-        <input
-          id="username"
-          className="mb-4 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-babyblue-500"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          autoFocus
-          required
+    <div className="grid min-h-dvh bg-bg lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)]">
+      {/* Brand panel: the sign on its wall, lit from behind. */}
+      <aside className="relative hidden overflow-hidden bg-sidebar lg:flex lg:flex-col lg:items-center lg:justify-center">
+        <div
+          aria-hidden
+          className="absolute left-1/2 top-1/2 size-[560px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent/25 blur-[120px]"
         />
-
-        <label htmlFor="password" className="mb-1 block text-sm font-medium text-gray-700">
-          Password
-        </label>
-        <input
-          id="password"
-          type="password"
-          className="mb-6 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-babyblue-500"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
+        <ArchFrame className="absolute left-1/2 top-1/2 h-[78%] w-auto -translate-x-1/2 -translate-y-[46%] text-sidebar-fg/10" />
+        <ArchFrame className="absolute left-1/2 top-1/2 h-[64%] w-auto -translate-x-1/2 -translate-y-[44%] text-sidebar-fg/[0.06]" />
+        <LogoMark
+          title="Shop logo"
+          className="relative h-56 w-auto text-sidebar-fg drop-shadow-[0_18px_40px_rgb(0_0_0/0.35)]"
         />
+        <p className="absolute bottom-10 flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-sidebar-muted">
+          <Diamond />
+          Point of sale
+          <Diamond />
+        </p>
+      </aside>
 
-        <button
-          type="submit"
-          disabled={submitting}
-          className="w-full rounded-lg bg-babyblue-600 py-2 text-sm font-medium text-white hover:bg-babyblue-700 disabled:opacity-50"
-        >
-          {submitting ? "Signing in..." : "Sign in"}
-        </button>
-      </form>
+      <main className="relative flex flex-col px-6 py-8 sm:px-10">
+        <div className="flex justify-end">
+          <ThemeToggle initial={theme} />
+        </div>
+
+        <div className="mx-auto flex w-full max-w-sm flex-1 flex-col justify-center py-10">
+          <LogoMark className="mb-10 h-16 w-auto self-start text-primary lg:hidden" />
+          <h1 className="text-[28px] font-semibold leading-9 tracking-tight text-fg">Welcome back</h1>
+          <p className="mb-8 mt-1.5 text-sm text-fg-muted">Sign in with your staff account to continue.</p>
+          <LoginForm />
+        </div>
+
+        <p className="text-center text-xs text-fg-subtle">Forgot your password? Ask an administrator to reset it.</p>
+      </main>
     </div>
   );
 }

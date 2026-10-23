@@ -17,6 +17,8 @@ import {
 } from "lucide-react";
 import { SHOP_NAME } from "@/lib/config";
 import { LogoMark } from "@/components/brand/Logo";
+import LogoutButton from "@/components/LogoutButton";
+import { cn } from "@/components/ui";
 
 export const ICONS = {
   dashboard: LayoutDashboard,
@@ -33,41 +35,113 @@ export const ICONS = {
 
 export type IconKey = keyof typeof ICONS;
 export type NavItem = { href: string; label: string; icon: IconKey };
+/** A titled group of links. */
+export type NavSection = { title: string; items: NavItem[] };
 
 const EXACT_MATCH_ROOTS = new Set(["/admin", "/pos"]);
 
-export default function Sidebar({ items }: { items: NavItem[] }) {
+export function isActive(pathname: string, href: string) {
+  return EXACT_MATCH_ROOTS.has(href) ? pathname === href : pathname.startsWith(href);
+}
+
+const ROLE_LABEL: Record<string, string> = { ADMIN: "Administrator", EMPLOYEE: "Cashier" };
+
+export default function Sidebar({
+  sections,
+  footer = [],
+  user,
+  onNavigate,
+}: {
+  sections: NavSection[];
+  footer?: NavItem[];
+  user: { username: string; role: string };
+  onNavigate?: () => void;
+}) {
   const pathname = usePathname();
 
   return (
-    <aside className="flex w-60 shrink-0 flex-col border-r border-gray-200 bg-white">
-      <div className="flex items-center gap-2 px-6 py-5">
-        <LogoMark className="h-11 w-auto text-primary" />
-        {SHOP_NAME && <span className="text-sm font-semibold text-gray-900">{SHOP_NAME}</span>}
+    <div className="flex h-full flex-col bg-sidebar text-sidebar-fg">
+      <div className="flex items-center gap-3 px-6 pb-6 pt-7">
+        <LogoMark className="h-12 w-auto text-sidebar-fg" />
+        {SHOP_NAME && <span className="text-sm font-semibold">{SHOP_NAME}</span>}
       </div>
 
-      <nav className="flex-1 space-y-1 px-3">
-        {items.map((item) => {
-          const active = EXACT_MATCH_ROOTS.has(item.href)
-            ? pathname === item.href
-            : pathname.startsWith(item.href);
-          const Icon = ICONS[item.icon];
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
-                active
-                  ? "bg-babyblue-100 text-babyblue-700"
-                  : "text-gray-600 hover:bg-beige-50 hover:text-gray-900"
-              }`}
-            >
-              <Icon className="h-4 w-4" />
-              {item.label}
-            </Link>
-          );
-        })}
+      <nav className="flex-1 space-y-6 overflow-y-auto px-3" aria-label="Main">
+        {sections.map((section) => (
+          <div key={section.title}>
+            <p className="mb-2 px-3 text-[11px] font-medium uppercase tracking-[0.12em] text-sidebar-muted/80">
+              {section.title}
+            </p>
+            <ul className="space-y-0.5">
+              {section.items.map((item) => (
+                <li key={item.href}>
+                  <SidebarLink item={item} active={isActive(pathname, item.href)} onNavigate={onNavigate} />
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
       </nav>
-    </aside>
+
+      {footer.length > 0 && (
+        <ul className="space-y-0.5 px-3 pb-3">
+          {footer.map((item) => (
+            <li key={item.href}>
+              <SidebarLink item={item} active={isActive(pathname, item.href)} onNavigate={onNavigate} />
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <div className="flex items-center gap-3 border-t border-sidebar-border px-5 py-4">
+        <div
+          aria-hidden
+          className="flex size-9 shrink-0 items-center justify-center rounded-full bg-sidebar-active text-sm font-semibold uppercase text-sidebar-fg ring-1 ring-white/10"
+        >
+          {user.username.charAt(0)}
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-sm font-medium">{user.username}</p>
+          <p className="truncate text-xs text-sidebar-muted">{ROLE_LABEL[user.role] ?? user.role}</p>
+        </div>
+        <LogoutButton />
+      </div>
+    </div>
+  );
+}
+
+function SidebarLink({
+  item,
+  active,
+  onNavigate,
+}: {
+  item: NavItem;
+  active: boolean;
+  onNavigate?: () => void;
+}) {
+  const Icon = ICONS[item.icon];
+  return (
+    <Link
+      href={item.href}
+      onClick={onNavigate}
+      aria-current={active ? "page" : undefined}
+      className={cn(
+        "group relative flex h-10 items-center gap-3 rounded-lg px-3 text-sm font-medium transition-colors",
+        active
+          ? "bg-sidebar-active text-sidebar-fg"
+          : "text-sidebar-muted hover:bg-sidebar-hover hover:text-sidebar-fg",
+      )}
+    >
+      {/* The logo's diamond marks the current page. */}
+      <span
+        aria-hidden
+        className={cn(
+          "absolute -left-[3px] size-1.5 rotate-45 bg-accent transition-opacity",
+          active ? "opacity-100" : "opacity-0",
+        )}
+      />
+      <Icon className={cn("size-[18px] shrink-0", active ? "text-accent" : "")} strokeWidth={1.75} />
+      {item.label}
+    </Link>
   );
 }

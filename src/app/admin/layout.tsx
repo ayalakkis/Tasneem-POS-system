@@ -1,28 +1,44 @@
 import { requirePageRole } from "@/lib/auth";
-import Sidebar, { type NavItem } from "@/components/layout/Sidebar";
-import TopBar from "@/components/layout/TopBar";
+import { getTheme } from "@/lib/theme-server";
+import AppShell from "@/components/layout/AppShell";
+import type { NavItem, NavSection } from "@/components/layout/Sidebar";
 
-const NAV_ITEMS: NavItem[] = [
-  { href: "/admin", label: "Dashboard", icon: "dashboard" },
-  { href: "/admin/categories", label: "Categories", icon: "categories" },
-  { href: "/admin/items", label: "Items", icon: "items" },
-  { href: "/admin/purchases", label: "Purchases", icon: "purchases" },
-  { href: "/admin/customers", label: "Customers", icon: "customers" },
-  { href: "/admin/deliveries", label: "Deliveries", icon: "deliveries" },
-  { href: "/admin/users", label: "Users", icon: "users" },
-  { href: "/pos", label: "POS", icon: "store" },
+const SECTIONS: NavSection[] = [
+  {
+    title: "Overview",
+    items: [{ href: "/admin", label: "Dashboard", icon: "dashboard" }],
+  },
+  {
+    title: "Catalog",
+    items: [
+      { href: "/admin/items", label: "Items", icon: "items" },
+      { href: "/admin/categories", label: "Categories", icon: "categories" },
+      { href: "/admin/purchases", label: "Purchases", icon: "purchases" },
+    ],
+  },
+  {
+    title: "People & orders",
+    items: [
+      { href: "/admin/customers", label: "Customers", icon: "customers" },
+      { href: "/admin/deliveries", label: "Deliveries", icon: "deliveries" },
+      { href: "/admin/users", label: "Users", icon: "users" },
+    ],
+  },
 ];
 
+const FOOTER: NavItem[] = [{ href: "/pos", label: "Open POS", icon: "store" }];
+
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
-  const session = await requirePageRole("ADMIN");
+  const [session, theme] = await Promise.all([requirePageRole("ADMIN"), getTheme()]);
 
   return (
-    <div className="flex h-screen bg-beige-50">
-      <Sidebar items={NAV_ITEMS} />
-      <div className="flex flex-1 flex-col overflow-hidden">
-        <TopBar username={session.username} />
-        <main className="flex-1 overflow-y-auto px-8 py-8">{children}</main>
-      </div>
-    </div>
+    <AppShell
+      sections={SECTIONS}
+      footer={FOOTER}
+      user={{ username: session.username, role: session.role }}
+      theme={theme}
+    >
+      {children}
+    </AppShell>
   );
 }
