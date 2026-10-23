@@ -1,39 +1,46 @@
 "use client";
 
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LabelList } from "recharts";
+import { ChartNoAxesColumn } from "lucide-react";
+import { EmptyState } from "@/components/ui";
+import ChartTooltip from "./ChartTooltip";
 
 type Row = { category: string; revenue: number };
 
-const COLORS = ["#3f8aa8", "#b99c60", "#82bfd8", "#a0824c", "#5fa8c4", "#7d653c", "#316e86"];
+const ROW_HEIGHT = 40;
 
+/**
+ * Horizontal bars, sorted, one hue: length carries the amount and the axis
+ * label carries the category, so color would only add noise. Every bar is
+ * direct-labelled, so there is no value axis or grid.
+ */
 export default function CategoryRevenueChart({ data }: { data: Row[] }) {
   if (data.length === 0) {
-    return (
-      <div className="flex h-[220px] items-center justify-center text-sm text-gray-400">
-        No sales yet.
-      </div>
-    );
+    return <EmptyState icon={ChartNoAxesColumn} title="No sales yet" description="Revenue by category shows up after the first sale." className="py-8" />;
   }
 
+  const sorted = [...data].sort((a, b) => b.revenue - a.revenue);
+
   return (
-    <ResponsiveContainer width="100%" height={220}>
-      <BarChart data={data} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
-        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-        <XAxis
+    <ResponsiveContainer width="100%" height={sorted.length * ROW_HEIGHT + 16}>
+      <BarChart data={sorted} layout="vertical" margin={{ top: 0, right: 56, left: 0, bottom: 0 }} barCategoryGap={10}>
+        <XAxis type="number" hide />
+        <YAxis
+          type="category"
           dataKey="category"
-          tick={{ fontSize: 11, fill: "#9ca3af" }}
+          width={120}
+          tick={{ fontSize: 12, fill: "var(--fg-muted)" }}
           axisLine={false}
           tickLine={false}
         />
-        <YAxis tick={{ fontSize: 11, fill: "#9ca3af" }} axisLine={false} tickLine={false} width={50} />
-        <Tooltip
-          contentStyle={{ borderRadius: 12, border: "1px solid #e5e7eb", fontSize: 12 }}
-          formatter={(value) => [Number(value).toFixed(2), "Revenue"]}
-        />
-        <Bar dataKey="revenue" radius={[6, 6, 0, 0]}>
-          {data.map((row, i) => (
-            <Cell key={row.category} fill={COLORS[i % COLORS.length]} />
-          ))}
+        <Tooltip cursor={{ fill: "var(--surface-2)" }} content={<ChartTooltip valueLabel="Revenue" />} />
+        <Bar dataKey="revenue" fill="var(--chart-series)" radius={[0, 4, 4, 0]} maxBarSize={22}>
+          <LabelList
+            dataKey="revenue"
+            position="right"
+            formatter={(v) => Number(v).toFixed(2)}
+            style={{ fontSize: 12, fill: "var(--fg)", fontVariantNumeric: "tabular-nums" }}
+          />
         </Bar>
       </BarChart>
     </ResponsiveContainer>

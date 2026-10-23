@@ -55,12 +55,14 @@
   --sidebar-active: #25574b;
   --sidebar-border: #24493f;
 
-  --chart-1: #2a6555;
-  --chart-2: #cf9846;
-  --chart-3: #8dbbab;
-  --chart-4: #b0453a;
-  --chart-5: #b7aa95;
-  --chart-grid: #e8e1d5;
+  /* Chart colors: validated with the dataviz palette checker (band, chroma, CVD). */
+  --chart-series: #007658;
+  --chart-pending: #bf801e;
+  --chart-transit: #1a89c5;
+  --chart-delivered: #1ea87b;
+  --chart-cancelled: #8f3222;
+  --chart-grid: #ebe4d8;
+  --chart-axis: #978c7a;
 
   --shadow-sm: 0 1px 2px rgb(40 30 15 / 0.05);
   --shadow-md: 0 1px 2px rgb(40 30 15 / 0.04), 0 4px 12px -2px rgb(40 30 15 / 0.08);
@@ -117,12 +119,14 @@
     --sidebar-active: #1b2f29;
     --sidebar-border: #1c2b26;
 
-    --chart-1: #5fa88e;
-    --chart-2: #d9a65a;
-    --chart-3: #2f6b5a;
-    --chart-4: #e07a6b;
-    --chart-5: #6f7a73;
+    /* Chart colors: validated against the dark surface, not flipped from light. */
+    --chart-series: #3ea080;
+    --chart-pending: #bf801e;
+    --chart-transit: #1a89c5;
+    --chart-delivered: #1ea87b;
+    --chart-cancelled: #b0503e;
     --chart-grid: #22332e;
+    --chart-axis: #737d77;
 
     --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.3);
     --shadow-md: 0 1px 2px rgb(0 0 0 / 0.3), 0 4px 12px -2px rgb(0 0 0 / 0.35);
@@ -173,12 +177,14 @@
   --sidebar-active: #1b2f29;
   --sidebar-border: #1c2b26;
 
-  --chart-1: #5fa88e;
-  --chart-2: #d9a65a;
-  --chart-3: #2f6b5a;
-  --chart-4: #e07a6b;
-  --chart-5: #6f7a73;
+  /* Chart colors: validated against the dark surface, not flipped from light. */
+  --chart-series: #3ea080;
+  --chart-pending: #bf801e;
+  --chart-transit: #1a89c5;
+  --chart-delivered: #1ea87b;
+  --chart-cancelled: #b0503e;
   --chart-grid: #22332e;
+  --chart-axis: #737d77;
 
   --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.3);
   --shadow-md: 0 1px 2px rgb(0 0 0 / 0.3), 0 4px 12px -2px rgb(0 0 0 / 0.35);
@@ -233,6 +239,11 @@
   --color-sidebar-hover: var(--sidebar-hover);
   --color-sidebar-active: var(--sidebar-active);
   --color-sidebar-border: var(--sidebar-border);
+  --color-chart-series: var(--chart-series);
+  --color-chart-pending: var(--chart-pending);
+  --color-chart-transit: var(--chart-transit);
+  --color-chart-delivered: var(--chart-delivered);
+  --color-chart-cancelled: var(--chart-cancelled);
 
   --shadow-sm: var(--shadow-sm);
   --shadow-md: var(--shadow-md);

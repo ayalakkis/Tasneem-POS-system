@@ -1,5 +1,19 @@
 import { notFound } from "next/navigation";
-import { ArrowRight, PackageOpen, Plus, Search, Trash2, Pencil } from "lucide-react";
+import {
+  ArrowRight,
+  CalendarDays,
+  Clock,
+  PackageOpen,
+  Pencil,
+  Plus,
+  Search,
+  Trash2,
+  TrendingUp,
+} from "lucide-react";
+import StatCard from "@/components/layout/StatCard";
+import ProfitTrendChart from "@/components/charts/ProfitTrendChart";
+import DeliveryStatusChart from "@/components/charts/DeliveryStatusChart";
+import CategoryRevenueChart from "@/components/charts/CategoryRevenueChart";
 import {
   Alert,
   Badge,
@@ -146,6 +160,47 @@ export default function UiKitPage() {
         <THead><TR><TH>Customer</TH><TH>Phone</TH></TR></THead>
         <TBody><TableEmpty colSpan={2}>No customers match “Ahmad”.</TableEmpty></TBody>
       </Table>
+
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <StatCard hero label="Profit today" value="412.50" icon={Clock} hint="12 sales" />
+        <StatCard label="This week" value="1,904.00" icon={CalendarDays} />
+        <StatCard label="Low stock" value="3" icon={PackageOpen} tone="danger" />
+        <StatCard label="This year" value="48,210.75" icon={TrendingUp} tone="accent" />
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-3">
+        <Card className="lg:col-span-2">
+          <CardHeader title="Area chart" description="Sample data" />
+          <CardBody className="pt-4">
+            <ProfitTrendChart
+              data={Array.from({ length: 30 }, (_, i) => ({
+                label: `Oct ${i + 1}`,
+                profit: Math.round(80 + 60 * Math.sin(i / 3) + i * 4),
+              }))}
+            />
+          </CardBody>
+        </Card>
+        <Card>
+          <CardHeader title="Status breakdown" description="Sample data" />
+          <CardBody>
+            <DeliveryStatusChart counts={{ PENDING: 4, OUT_FOR_DELIVERY: 3, DELIVERED: 18, CANCELLED: 2 }} />
+          </CardBody>
+        </Card>
+      </div>
+
+      <Card>
+        <CardHeader title="Bar chart" description="Sample data" />
+        <CardBody className="pt-4">
+          <CategoryRevenueChart
+            data={[
+              { category: "Books", revenue: 1240 },
+              { category: "Perfumes", revenue: 2310.5 },
+              { category: "Prayer items", revenue: 860 },
+              { category: "Clothing", revenue: 1595 },
+            ]}
+          />
+        </CardBody>
+      </Card>
 
       <Card>
         <EmptyState
