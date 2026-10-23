@@ -1,0 +1,87 @@
+import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { requireApiRole } from "@/lib/auth";
+
+export async function POST(request: NextRequest) {
+  const auth = await requireApiRole("ADMIN", "EMPLOYEE");
+  if ("error" in auth) return auth.error;
+
+  const body = await request.json().catch(() => null);
+  const customerId = typeof body?.customerId === "string" ? body.customerId : null;
+  const lines = Array.isArray(body?.items) ? body.items : [];
+
+  if (lines.length === 0) {
+    return NextResponse.json({ error: "At least one item is required" }, { status: 400 });
+  }
+
+  const parsedLines: { itemId: string; quantity: number }[] = [];
+  for (const line of lines) {
+    const itemId = typeof line?.itemId === "string" ? line.itemId : "";
+    const quantity = Number(line?.quantity);
+    if (!itemId || !Number.isInteger(quantity) || quantity <= 0) {
+      return NextResponse.json(
+        { error: "Each line needs a valid item and a positive whole quantity" },
+        { status: 400 }
+      );
+    }
+    parsedLines.push({ itemId, quantity });
+  }
+
+  if (customerId) {
+    const customer = await prisma.customer.findUnique({ where: { id: customerId } });
+    if (!customer) {
+      return NextResponse.json({ error: "Customer not found" }, { status: 404 });
+    }
+  }
+
+  const itemIds = parsedLines.map((l) => l.itemId);
+  const items = await prisma.item.findMany({ where: { id: { in: itemIds } } });
+  const itemById = new Map(items.map((i) => [i.id, i]));
+
+  for (const line of parsedLines) {
+    const item = itemById.get(line.itemId);
+    if (!item) {
+      return NextResponse.json({ error: "One of the items no longer exists" }, { status: 404 });
+    }
+    if (item.quantityInStock < line.quantity) {
+      return NextResponse.json(
+        { error: `Not enough stock for "${item.name}" (${item.quantityInStock} available)` },
+        { status: 409 }
+      );
+    }
+  }
+
+  const invoiceItemsData = parsedLines.map((line) => {
+    const item = itemById.get(line.itemId)!;
+    return {
+      itemId: item.id,
+      quantity: line.quantity,
+      unitPrice: item.sellingPrice,
+      unitCost: item.costPrice,
+      subtotal: item.sellingPrice * line.quantity,
+    };
+  });
+  const totalAmount = invoiceItemsData.reduce((sum, l) => sum + l.subtotal, 0);
+
+  const invoice = await prisma.$transaction(async (tx) => {
+    const created = await tx.salesInvoice.create({
+      data: {
+        customerId,
+        totalAmount,
+        createdById: auth.session.userId,
+        items: { create: invoiceItemsData },
+      },
+    });
+
+    for (const line of parsedLines) {
+      await tx.item.update({
+        where: { id: line.itemId },
+        data: { quantityInStock: { decrement: line.quantity } },
+      });
+    }
+
+    return created;
+  });
+
+  return NextResponse.json({ id: invoice.id }, { status: 201 });
+}

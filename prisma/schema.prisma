@@ -1,0 +1,106 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  EMPLOYEE
+}
+
+enum DeliveryStatus {
+  PENDING
+  OUT_FOR_DELIVERY
+  DELIVERED
+  CANCELLED
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String?
+  username     String   @unique
+  passwordHash String
+  role         Role
+  createdAt    DateTime @default(now())
+
+  purchaseInvoices PurchaseInvoice[]
+  salesInvoices    SalesInvoice[]
+}
+
+model Category {
+  id    String @id @default(cuid())
+  name  String @unique
+  items Item[]
+}
+
+model Item {
+  id              String   @id @default(cuid())
+  name            String
+  barcode         String?  @unique
+  categoryId      String
+  category        Category @relation(fields: [categoryId], references: [id])
+  origin          String?
+  costPrice       Float
+  sellingPrice    Float
+  quantityInStock Int      @default(0)
+  createdAt       DateTime @default(now())
+
+  purchaseInvoices  PurchaseInvoice[]
+  salesInvoiceItems SalesInvoiceItem[]
+}
+
+model PurchaseInvoice {
+  id          String   @id @default(cuid())
+  itemId      String
+  item        Item     @relation(fields: [itemId], references: [id])
+  quantity    Int
+  unitCost    Float
+  totalPaid   Float
+  supplier    String?
+  date        DateTime @default(now())
+  createdById String
+  createdBy   User     @relation(fields: [createdById], references: [id])
+}
+
+model Customer {
+  id        String   @id @default(cuid())
+  name      String
+  phone     String
+  createdAt DateTime @default(now())
+
+  salesInvoices SalesInvoice[]
+
+  @@index([phone])
+}
+
+model SalesInvoice {
+  id          String    @id @default(cuid())
+  customerId  String?
+  customer    Customer? @relation(fields: [customerId], references: [id])
+  totalAmount Float
+  date        DateTime  @default(now())
+  createdById String
+  createdBy   User      @relation(fields: [createdById], references: [id])
+
+  isDelivery      Boolean         @default(false)
+  deliveryAddress String?
+  deliveryStatus  DeliveryStatus?
+
+  items SalesInvoiceItem[]
+}
+
+model SalesInvoiceItem {
+  id             String       @id @default(cuid())
+  salesInvoiceId String
+  salesInvoice   SalesInvoice @relation(fields: [salesInvoiceId], references: [id])
+  itemId         String
+  item           Item         @relation(fields: [itemId], references: [id])
+  quantity       Int
+  unitPrice      Float
+  unitCost       Float
+  subtotal       Float
+}
