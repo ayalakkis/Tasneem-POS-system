@@ -1,9 +1,23 @@
-import Link from "next/link";
-import { Package, Boxes, AlertTriangle, DollarSign } from "lucide-react";
+import { Package, Boxes, AlertTriangle, Coins, Plus, Pencil, PackageSearch } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import StatCard from "@/components/layout/StatCard";
+import {
+  Badge,
+  EmptyState,
+  LinkButton,
+  PageHeader,
+  Table,
+  TBody,
+  TD,
+  TH,
+  THead,
+  TR,
+  TableEmpty,
+} from "@/components/ui";
 import ItemsFilterBar from "./ItemsFilterBar";
 import DeleteItemButton from "./DeleteItemButton";
+
+const LOW_STOCK = 5;
 
 export default async function ItemsPage({
   searchParams,
@@ -26,100 +40,113 @@ export default async function ItemsPage({
   ]);
 
   const totalStock = allItems.reduce((sum, i) => sum + i.quantityInStock, 0);
-  const lowStockCount = allItems.filter((i) => i.quantityInStock < 5).length;
+  const lowStockCount = allItems.filter((i) => i.quantityInStock < LOW_STOCK).length;
   const inventoryValue = allItems.reduce((sum, i) => sum + i.costPrice * i.quantityInStock, 0);
+  const filtering = Boolean(q || categoryId);
 
   return (
     <div>
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold text-gray-900">Items</h1>
-          <p className="mt-1 text-sm text-gray-500">Manage products, pricing, and barcodes.</p>
-        </div>
-        <Link
-          href="/admin/items/new"
-          className="rounded-lg bg-babyblue-600 px-4 py-2 text-sm font-medium text-white hover:bg-babyblue-700"
-        >
-          Add item
-        </Link>
-      </div>
+      <PageHeader
+        eyebrow="Catalog"
+        title="Items"
+        description="Manage products, pricing and barcodes."
+        actions={
+          <LinkButton href="/admin/items/new" icon={Plus}>
+            Add item
+          </LinkButton>
+        }
+      />
 
-      <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <StatCard label="Total items" value={allItems.length} icon={Package} />
+        <StatCard label="Units in stock" value={totalStock} icon={Boxes} tone="info" />
         <StatCard
-          label="Total stock units"
-          value={totalStock}
-          icon={Boxes}
-          color="bg-beige-100 text-beige-700"
-        />
-        <StatCard
-          label="Low stock (< 5)"
+          label={`Low stock (under ${LOW_STOCK})`}
           value={lowStockCount}
           icon={AlertTriangle}
-          color="bg-babyblue-200 text-babyblue-800"
+          tone={lowStockCount > 0 ? "danger" : "neutral"}
         />
-        <StatCard
-          label="Inventory value"
-          value={inventoryValue.toFixed(2)}
-          icon={DollarSign}
-          color="bg-beige-200 text-beige-800"
-        />
+        <StatCard label="Inventory value" value={inventoryValue.toFixed(2)} icon={Coins} tone="accent" hint="At cost price" />
       </div>
 
-      <div className="mt-6">
-        <ItemsFilterBar categories={categories} initialQuery={q} initialCategoryId={categoryId} />
-      </div>
+      {allItems.length === 0 ? (
+        <div className="mt-6 rounded-xl border border-border bg-surface shadow-sm">
+          <EmptyState
+            icon={Package}
+            title="No items yet"
+            description="Add your first product to start selling it at the POS."
+            action={
+              <LinkButton href="/admin/items/new" icon={Plus}>
+                Add item
+              </LinkButton>
+            }
+          />
+        </div>
+      ) : (
+        <>
+          <div className="mt-8">
+            <ItemsFilterBar categories={categories} initialQuery={q} initialCategoryId={categoryId} />
+          </div>
 
-      <div className="mt-4 overflow-x-auto rounded-xl border border-gray-200 bg-white shadow-sm">
-        <table className="min-w-full divide-y divide-gray-200 text-sm">
-          <thead>
-            <tr className="text-left text-xs font-medium uppercase tracking-wide text-gray-500">
-              <th className="px-4 py-3">Name</th>
-              <th className="px-4 py-3">Category</th>
-              <th className="px-4 py-3">Barcode</th>
-              <th className="px-4 py-3">Cost</th>
-              <th className="px-4 py-3">Price</th>
-              <th className="px-4 py-3">Stock</th>
-              <th className="px-4 py-3"></th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-200">
-            {items.map((item) => (
-              <tr key={item.id}>
-                <td className="px-4 py-3 font-medium text-gray-900">{item.name}</td>
-                <td className="px-4 py-3 text-gray-600">{item.category.name}</td>
-                <td className="px-4 py-3 text-gray-600">{item.barcode ?? "—"}</td>
-                <td className="px-4 py-3 text-gray-600">{item.costPrice.toFixed(2)}</td>
-                <td className="px-4 py-3 text-gray-600">{item.sellingPrice.toFixed(2)}</td>
-                <td className="px-4 py-3">
-                  <span
-                    className={`rounded-full px-2 py-1 text-xs font-medium ${
-                      item.quantityInStock < 5
-                        ? "bg-beige-200 text-beige-800"
-                        : "bg-gray-50 text-gray-600"
-                    }`}
-                  >
-                    {item.quantityInStock}
-                  </span>
-                </td>
-                <td className="px-4 py-3 text-right whitespace-nowrap">
-                  <Link href={`/admin/items/${item.id}`} className="text-gray-600 hover:underline">
-                    Edit
-                  </Link>
-                  <DeleteItemButton itemId={item.id} itemName={item.name} />
-                </td>
-              </tr>
-            ))}
-            {items.length === 0 && (
-              <tr>
-                <td colSpan={7} className="px-4 py-6 text-center text-gray-400">
-                  No items found.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+          <Table className="mt-4">
+            <THead>
+              <TR>
+                <TH>Name</TH>
+                <TH>Category</TH>
+                <TH>Barcode</TH>
+                <TH numeric>Cost</TH>
+                <TH numeric>Price</TH>
+                <TH numeric>Stock</TH>
+                <TH>
+                  <span className="sr-only">Actions</span>
+                </TH>
+              </TR>
+            </THead>
+            <TBody>
+              {items.map((item) => (
+                <TR key={item.id}>
+                  <TD className="font-medium text-fg">{item.name}</TD>
+                  <TD>{item.category.name}</TD>
+                  <TD className="tabular-nums text-fg-subtle">{item.barcode ?? "—"}</TD>
+                  <TD numeric>{item.costPrice.toFixed(2)}</TD>
+                  <TD numeric className="font-medium text-fg">
+                    {item.sellingPrice.toFixed(2)}
+                  </TD>
+                  <TD numeric>
+                    <Badge
+                      tone={
+                        item.quantityInStock === 0 ? "danger" : item.quantityInStock < LOW_STOCK ? "accent" : "neutral"
+                      }
+                    >
+                      {item.quantityInStock}
+                    </Badge>
+                  </TD>
+                  <TD className="w-px whitespace-nowrap text-right">
+                    <div className="flex justify-end gap-1">
+                      <LinkButton
+                        href={`/admin/items/${item.id}`}
+                        variant="ghost"
+                        size="sm"
+                        iconOnly
+                        icon={Pencil}
+                        aria-label={`Edit ${item.name}`}
+                        title="Edit"
+                      />
+                      <DeleteItemButton itemId={item.id} itemName={item.name} />
+                    </div>
+                  </TD>
+                </TR>
+              ))}
+              {items.length === 0 && (
+                <TableEmpty colSpan={7}>
+                  <PackageSearch className="mx-auto mb-2 size-5 text-fg-subtle" aria-hidden />
+                  {filtering ? "No items match these filters." : "No items found."}
+                </TableEmpty>
+              )}
+            </TBody>
+          </Table>
+        </>
+      )}
     </div>
   );
 }

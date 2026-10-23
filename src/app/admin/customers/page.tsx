@@ -1,7 +1,8 @@
 import Link from "next/link";
-import { Users, Receipt, Repeat } from "lucide-react";
+import { Users, Receipt, Repeat, ChevronRight } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import StatCard from "@/components/layout/StatCard";
+import { Badge, EmptyState, PageHeader, Table, TBody, TD, TH, THead, TR } from "@/components/ui";
 
 export default async function CustomersPage() {
   const customers = await prisma.customer.findMany({
@@ -14,59 +15,81 @@ export default async function CustomersPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-semibold text-gray-900">Customers</h1>
-      <p className="mt-1 text-sm text-gray-500">
-        Customers are added from the POS screen during checkout.
-      </p>
+      <PageHeader
+        eyebrow="People & orders"
+        title="Customers"
+        description="Customers are added from the POS screen during checkout."
+      />
 
-      <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
         <StatCard label="Total customers" value={customers.length} icon={Users} />
-        <StatCard
-          label="Total invoices"
-          value={totalInvoices}
-          icon={Receipt}
-          color="bg-beige-100 text-beige-700"
-        />
+        <StatCard label="Total invoices" value={totalInvoices} icon={Receipt} tone="info" />
         <StatCard
           label="Returning customers"
           value={returningCustomers}
           icon={Repeat}
-          color="bg-babyblue-200 text-babyblue-800"
+          tone="accent"
+          hint="More than one invoice"
         />
       </div>
 
-      <div className="mt-6 overflow-x-auto rounded-xl border border-gray-200 bg-white shadow-sm">
-        <table className="min-w-full divide-y divide-gray-200 text-sm">
-          <thead>
-            <tr className="text-left text-xs font-medium uppercase tracking-wide text-gray-500">
-              <th className="px-4 py-3">Name</th>
-              <th className="px-4 py-3">Phone</th>
-              <th className="px-4 py-3">Invoices</th>
-              <th className="px-4 py-3"></th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-200">
-            {customers.map((c) => (
-              <tr key={c.id}>
-                <td className="px-4 py-3 font-medium text-gray-900">{c.name}</td>
-                <td className="px-4 py-3 text-gray-600">{c.phone}</td>
-                <td className="px-4 py-3 text-gray-600">{c._count.salesInvoices}</td>
-                <td className="px-4 py-3 text-right">
-                  <Link href={`/admin/customers/${c.id}`} className="text-gray-600 hover:underline">
-                    View history
-                  </Link>
-                </td>
-              </tr>
-            ))}
-            {customers.length === 0 && (
-              <tr>
-                <td colSpan={4} className="px-4 py-6 text-center text-gray-400">
-                  No customers yet.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+      <div className="mt-8">
+        {customers.length === 0 ? (
+          <div className="rounded-xl border border-border bg-surface shadow-sm">
+            <EmptyState
+              icon={Users}
+              title="No customers yet"
+              description="Enter a phone number at checkout to save a customer."
+            />
+          </div>
+        ) : (
+          <Table>
+            <THead>
+              <TR>
+                <TH>Name</TH>
+                <TH>Phone</TH>
+                <TH numeric>Invoices</TH>
+                <TH>
+                  <span className="sr-only">Open</span>
+                </TH>
+              </TR>
+            </THead>
+            <TBody>
+              {customers.map((c) => (
+                <TR key={c.id} className="relative">
+                  <TD>
+                    <div className="flex items-center gap-3">
+                      <span
+                        aria-hidden
+                        className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary-soft text-xs font-semibold uppercase text-primary-soft-fg"
+                      >
+                        {c.name.charAt(0)}
+                      </span>
+                      {/* The link covers the whole row (see the after: overlay). */}
+                      <Link
+                        href={`/admin/customers/${c.id}`}
+                        className="font-medium text-fg after:absolute after:inset-0 after:content-['']"
+                      >
+                        {c.name}
+                      </Link>
+                    </div>
+                  </TD>
+                  <TD className="tabular-nums">{c.phone}</TD>
+                  <TD numeric>
+                    {c._count.salesInvoices > 1 ? (
+                      <Badge tone="accent">{c._count.salesInvoices}</Badge>
+                    ) : (
+                      c._count.salesInvoices
+                    )}
+                  </TD>
+                  <TD className="w-px text-right">
+                    <ChevronRight className="ml-auto size-4 text-fg-subtle" aria-hidden />
+                  </TD>
+                </TR>
+              ))}
+            </TBody>
+          </Table>
+        )}
       </div>
     </div>
   );

@@ -326,6 +326,13 @@
   --color-gray-900: #1c1a16;
 }
 
+@keyframes dialog-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.98);
+  }
+}
+
 @layer base {
   html {
     -webkit-text-size-adjust: 100%;

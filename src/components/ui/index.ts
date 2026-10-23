@@ -7,3 +7,4 @@ export { Table, THead, TBody, TR, TH, TD, TableEmpty } from "./Table";
 export { PageHeader } from "./PageHeader";
 export { EmptyState } from "./EmptyState";
 export { Alert, type AlertTone } from "./Alert";
+export { ConfirmDialog } from "./ConfirmDialog";

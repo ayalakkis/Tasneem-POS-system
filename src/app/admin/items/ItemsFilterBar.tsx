@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
+import { Search } from "lucide-react";
+import { Input, Select } from "@/components/ui";
 
 type Category = { id: string; name: string };
 
@@ -27,9 +29,12 @@ export default function ItemsFilterBar({
   }
 
   return (
-    <div className="flex gap-3">
-      <input
-        className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-babyblue-500"
+    <div className="flex flex-col gap-3 sm:flex-row" role="search">
+      <Input
+        icon={Search}
+        type="search"
+        aria-label="Search items"
+        className="flex-1"
         placeholder="Search by name or barcode"
         value={q}
         onChange={(e) => {
@@ -37,8 +42,9 @@ export default function ItemsFilterBar({
           applyFilters(e.target.value, categoryId);
         }}
       />
-      <select
-        className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-babyblue-500"
+      <Select
+        aria-label="Filter by category"
+        className="sm:w-56"
         value={categoryId}
         onChange={(e) => {
           setCategoryId(e.target.value);
@@ -51,7 +57,7 @@ export default function ItemsFilterBar({
             {c.name}
           </option>
         ))}
-      </select>
+      </Select>
     </div>
   );
 }

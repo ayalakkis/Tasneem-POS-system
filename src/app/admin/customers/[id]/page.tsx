@@ -1,6 +1,10 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
+import { ArrowLeft, Phone, ReceiptText, Receipt, Wallet, CalendarClock } from "lucide-react";
 import { prisma } from "@/lib/prisma";
+import StatCard from "@/components/layout/StatCard";
+import { EmptyState, LinkButton, PageHeader, Table, TBody, TD, TH, THead, TR } from "@/components/ui";
+
+const dateFormat = new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short", year: "numeric" });
 
 export default async function CustomerDetailPage({
   params,
@@ -21,49 +25,73 @@ export default async function CustomerDetailPage({
 
   if (!customer) notFound();
 
+  const invoices = customer.salesInvoices;
+  const lifetime = invoices.reduce((sum, inv) => sum + inv.totalAmount, 0);
+
   return (
     <div>
-      <Link href="/admin/customers" className="text-sm text-gray-500 hover:underline">
-        ← Back to customers
-      </Link>
-      <h1 className="mt-2 text-2xl font-semibold text-gray-900">{customer.name}</h1>
-      <p className="mt-1 text-sm text-gray-500">{customer.phone}</p>
+      <PageHeader
+        eyebrow="Customer"
+        title={customer.name}
+        description={
+          <span className="inline-flex items-center gap-1.5 tabular-nums">
+            <Phone className="size-3.5" aria-hidden />
+            {customer.phone}
+          </span>
+        }
+        actions={
+          <LinkButton href="/admin/customers" variant="ghost" icon={ArrowLeft}>
+            All customers
+          </LinkButton>
+        }
+      />
 
-      <div className="mt-6 overflow-x-auto rounded-xl border border-gray-200 bg-white shadow-sm">
-        <table className="min-w-full divide-y divide-gray-200 text-sm">
-          <thead>
-            <tr className="text-left text-xs font-medium uppercase tracking-wide text-gray-500">
-              <th className="px-4 py-3">Date</th>
-              <th className="px-4 py-3">Items</th>
-              <th className="px-4 py-3">Total</th>
-              <th className="px-4 py-3"></th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-200">
-            {customer.salesInvoices.map((inv) => (
-              <tr key={inv.id}>
-                <td className="px-4 py-3 text-gray-600">{inv.date.toLocaleDateString()}</td>
-                <td className="px-4 py-3 text-gray-600">
-                  {inv.items.reduce((sum, i) => sum + i.quantity, 0)} item(s)
-                </td>
-                <td className="px-4 py-3 text-gray-600">{inv.totalAmount.toFixed(2)}</td>
-                <td className="px-4 py-3 text-right">
-                  <Link href={`/invoices/${inv.id}`} className="text-gray-600 hover:underline">
-                    View invoice
-                  </Link>
-                </td>
-              </tr>
-            ))}
-            {customer.salesInvoices.length === 0 && (
-              <tr>
-                <td colSpan={4} className="px-4 py-6 text-center text-gray-400">
-                  No invoices yet.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
+        <StatCard label="Invoices" value={invoices.length} icon={Receipt} />
+        <StatCard label="Lifetime spend" value={lifetime.toFixed(2)} icon={Wallet} tone="accent" />
+        <StatCard
+          label="Last visit"
+          value={invoices[0] ? dateFormat.format(invoices[0].date) : "—"}
+          icon={CalendarClock}
+          tone="info"
+        />
       </div>
+
+      <h2 className="mb-3 mt-10 text-sm font-semibold text-fg">Purchase history</h2>
+      {invoices.length === 0 ? (
+        <div className="rounded-xl border border-border bg-surface shadow-sm">
+          <EmptyState icon={ReceiptText} title="No invoices yet" />
+        </div>
+      ) : (
+        <Table>
+          <THead>
+            <TR>
+              <TH>Date</TH>
+              <TH numeric>Items</TH>
+              <TH numeric>Total</TH>
+              <TH>
+                <span className="sr-only">Actions</span>
+              </TH>
+            </TR>
+          </THead>
+          <TBody>
+            {invoices.map((inv) => (
+              <TR key={inv.id}>
+                <TD className="tabular-nums">{dateFormat.format(inv.date)}</TD>
+                <TD numeric>{inv.items.reduce((sum, i) => sum + i.quantity, 0)}</TD>
+                <TD numeric className="font-medium text-fg">
+                  {inv.totalAmount.toFixed(2)}
+                </TD>
+                <TD className="w-px text-right">
+                  <LinkButton href={`/invoices/${inv.id}`} variant="ghost" size="sm" icon={ReceiptText}>
+                    Invoice
+                  </LinkButton>
+                </TD>
+              </TR>
+            ))}
+          </TBody>
+        </Table>
+      )}
     </div>
   );
 }

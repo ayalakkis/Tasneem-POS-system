@@ -2,6 +2,7 @@ import { UserCog, ShieldCheck, UsersRound } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { requirePageUser } from "@/lib/auth";
 import StatCard from "@/components/layout/StatCard";
+import { PageHeader } from "@/components/ui";
 import UsersManager from "./UsersManager";
 
 export default async function UsersPage() {
@@ -16,26 +17,15 @@ export default async function UsersPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-semibold text-gray-900">Users</h1>
-      <p className="mt-1 text-sm text-gray-500">Create, edit, and remove employee accounts.</p>
+      <PageHeader eyebrow="People & orders" title="Users" description="Create, edit and remove staff accounts." />
 
-      <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
         <StatCard label="Total users" value={users.length} icon={UsersRound} />
-        <StatCard
-          label="Admins"
-          value={adminCount}
-          icon={ShieldCheck}
-          color="bg-beige-100 text-beige-700"
-        />
-        <StatCard
-          label="Employees"
-          value={employeeCount}
-          icon={UserCog}
-          color="bg-babyblue-200 text-babyblue-800"
-        />
+        <StatCard label="Admins" value={adminCount} icon={ShieldCheck} tone="accent" />
+        <StatCard label="Employees" value={employeeCount} icon={UserCog} tone="info" />
       </div>
 
-      <div className="mt-6">
+      <div className="mt-8">
         <UsersManager
           initialUsers={users.map((u) => ({
             id: u.id,

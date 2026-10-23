@@ -2,8 +2,20 @@
 
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import { Pencil, Trash2, ShieldCheck, UserRound, Check, X } from "lucide-react";
+import { Pencil, Trash2, ShieldCheck, UserRound, UserPlus } from "lucide-react";
 import type { Role } from "@prisma/client";
+import {
+  Alert,
+  Badge,
+  Button,
+  Card,
+  CardBody,
+  CardHeader,
+  ConfirmDialog,
+  Field,
+  Input,
+  cn,
+} from "@/components/ui";
 
 type UserRow = { id: string; name: string | null; username: string; role: Role };
 
@@ -28,7 +40,7 @@ export default function UsersManager({
   const [editUsername, setEditUsername] = useState("");
   const [editPassword, setEditPassword] = useState("");
   const [savingEdit, setSavingEdit] = useState(false);
-  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState<UserRow | null>(null);
 
   async function handleCreate(e: FormEvent) {
     e.preventDefault();
@@ -54,7 +66,7 @@ export default function UsersManager({
       setUsers((prev) => [...prev, data]);
       router.refresh();
     } catch {
-      setError("Failed to create employee — check your connection and try again");
+      setError("Failed to create employee. Check your connection and try again.");
     } finally {
       setSubmitting(false);
     }
@@ -68,7 +80,8 @@ export default function UsersManager({
     setEditPassword("");
   }
 
-  async function handleSaveEdit(id: string) {
+  async function handleSaveEdit(e: FormEvent, id: string) {
+    e.preventDefault();
     setError(null);
     setSavingEdit(true);
 
@@ -93,172 +106,181 @@ export default function UsersManager({
       setEditingId(null);
       router.refresh();
     } catch {
-      setError("Failed to update user — check your connection and try again");
+      setError("Failed to update user. Check your connection and try again.");
     } finally {
       setSavingEdit(false);
     }
   }
 
   async function handleDelete(id: string) {
-    if (!confirm("Delete this user? This cannot be undone.")) return;
-    setError(null);
-    setDeletingId(id);
-
+    let res: Response;
     try {
-      const res = await fetch(`/api/users/${id}`, { method: "DELETE" });
-      const data = await res.json().catch(() => ({}));
-
-      if (!res.ok) {
-        setError(data.error ?? "Failed to delete user");
-        return;
-      }
-
-      setUsers((prev) => prev.filter((u) => u.id !== id));
-      router.refresh();
+      res = await fetch(`/api/users/${id}`, { method: "DELETE" });
     } catch {
-      setError("Failed to delete user — check your connection and try again");
-    } finally {
-      setDeletingId(null);
+      throw new Error("Failed to delete user. Check your connection and try again.");
     }
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error ?? "Failed to delete user");
+
+    setUsers((prev) => prev.filter((u) => u.id !== id));
+    router.refresh();
   }
 
   return (
-    <div className="space-y-6">
-      {error && <div className="rounded-lg bg-beige-100 px-3 py-2 text-sm text-beige-900">{error}</div>}
+    <div className="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] lg:items-start">
+      <Card>
+        <CardHeader title="New employee" description="Employees can use the POS only. They never see cost or profit." />
+        <CardBody>
+          <form onSubmit={handleCreate} className="space-y-4" autoComplete="off">
+            <Field label="Full name" htmlFor="new-name">
+              <Input id="new-name" value={name} onChange={(e) => setName(e.target.value)} required />
+            </Field>
+            <Field label="Username" htmlFor="new-username" hint="Used to sign in.">
+              <Input
+                id="new-username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                autoCapitalize="none"
+                spellCheck={false}
+                required
+              />
+            </Field>
+            <Field label="Temporary password" htmlFor="new-password" hint="At least 6 characters. Share it with the employee.">
+              <Input
+                id="new-password"
+                type="text"
+                autoComplete="new-password"
+                spellCheck={false}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                minLength={6}
+                required
+              />
+            </Field>
+            <Button type="submit" icon={UserPlus} loading={submitting} className="w-full">
+              Create employee
+            </Button>
+          </form>
+        </CardBody>
+      </Card>
 
-      <form
-        onSubmit={handleCreate}
-        className="grid grid-cols-1 gap-3 rounded-xl border border-gray-200 bg-white p-4 shadow-sm sm:grid-cols-4"
-      >
-        <input
-          className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-babyblue-500"
-          placeholder="Name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          required
-        />
-        <input
-          className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-babyblue-500"
-          placeholder="Username"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          required
-        />
-        <input
-          className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-babyblue-500"
-          placeholder="Password"
-          type="text"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          minLength={6}
-          required
-        />
-        <button
-          type="submit"
-          disabled={submitting}
-          className="rounded-lg bg-babyblue-600 px-4 py-2 text-sm font-medium text-white hover:bg-babyblue-700 disabled:opacity-50"
-        >
-          {submitting ? "Creating..." : "Create employee"}
-        </button>
-      </form>
+      <div className="space-y-4">
+        {error && <Alert tone="danger">{error}</Alert>}
 
-      <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
-        <ul className="divide-y divide-gray-200">
-          {users.map((u) => {
-            const isAdmin = u.role === "ADMIN";
-            const isSelf = u.id === currentUserId;
-            const isEditing = editingId === u.id;
+        <Card>
+          <CardHeader title="Team" description={`${users.length} account${users.length === 1 ? "" : "s"}`} />
+          <ul className="mt-4 divide-y divide-border border-t border-border">
+            {users.map((u) => {
+              const isAdmin = u.role === "ADMIN";
+              const isSelf = u.id === currentUserId;
 
-            if (isEditing) {
+              if (editingId === u.id) {
+                return (
+                  <li key={u.id} className="bg-surface-2 px-5 py-4">
+                    <form onSubmit={(e) => handleSaveEdit(e, u.id)} className="space-y-3">
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        <Field label="Full name" htmlFor={`edit-name-${u.id}`}>
+                          <Input
+                            id={`edit-name-${u.id}`}
+                            size="sm"
+                            value={editName}
+                            onChange={(e) => setEditName(e.target.value)}
+                            onKeyDown={(e) => e.key === "Escape" && setEditingId(null)}
+                            autoFocus
+                          />
+                        </Field>
+                        <Field label="Username" htmlFor={`edit-username-${u.id}`}>
+                          <Input
+                            id={`edit-username-${u.id}`}
+                            size="sm"
+                            value={editUsername}
+                            onChange={(e) => setEditUsername(e.target.value)}
+                            onKeyDown={(e) => e.key === "Escape" && setEditingId(null)}
+                          />
+                        </Field>
+                      </div>
+                      <Field label="New password" htmlFor={`edit-password-${u.id}`} optional hint="Leave blank to keep the current one.">
+                        <Input
+                          id={`edit-password-${u.id}`}
+                          size="sm"
+                          autoComplete="new-password"
+                          value={editPassword}
+                          onChange={(e) => setEditPassword(e.target.value)}
+                          onKeyDown={(e) => e.key === "Escape" && setEditingId(null)}
+                          minLength={6}
+                        />
+                      </Field>
+                      <div className="flex justify-end gap-2">
+                        <Button variant="ghost" size="sm" onClick={() => setEditingId(null)}>
+                          Cancel
+                        </Button>
+                        <Button type="submit" size="sm" loading={savingEdit}>
+                          Save changes
+                        </Button>
+                      </div>
+                    </form>
+                  </li>
+                );
+              }
+
               return (
-                <li key={u.id} className="px-4 py-3">
-                  <div className="grid grid-cols-1 gap-2 sm:grid-cols-4">
-                    <input
-                      className="rounded-lg border border-gray-300 px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-babyblue-500"
-                      placeholder="Name"
-                      value={editName}
-                      onChange={(e) => setEditName(e.target.value)}
-                      autoFocus
+                <li key={u.id} className="flex items-center gap-3 px-5 py-3.5">
+                  <div
+                    className={cn(
+                      "flex size-9 shrink-0 items-center justify-center rounded-full",
+                      isAdmin ? "bg-accent-soft text-accent-soft-fg" : "bg-primary-soft text-primary-soft-fg",
+                    )}
+                  >
+                    {isAdmin ? (
+                      <ShieldCheck className="size-4" aria-hidden />
+                    ) : (
+                      <UserRound className="size-4" aria-hidden />
+                    )}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="flex items-center gap-2 truncate text-sm font-medium text-fg">
+                      {u.name || u.username}
+                      {isSelf && <Badge tone="neutral">You</Badge>}
+                    </p>
+                    <p className="truncate text-xs text-fg-subtle">@{u.username}</p>
+                  </div>
+                  <Badge tone={isAdmin ? "accent" : "primary"}>{isAdmin ? "Admin" : "Employee"}</Badge>
+                  <div className="flex items-center gap-0.5">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      iconOnly
+                      icon={Pencil}
+                      aria-label={`Edit ${u.name || u.username}`}
+                      title="Edit"
+                      onClick={() => startEdit(u)}
                     />
-                    <input
-                      className="rounded-lg border border-gray-300 px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-babyblue-500"
-                      placeholder="Username"
-                      value={editUsername}
-                      onChange={(e) => setEditUsername(e.target.value)}
+                    <Button
+                      variant="danger-ghost"
+                      size="sm"
+                      iconOnly
+                      icon={Trash2}
+                      aria-label={`Delete ${u.name || u.username}`}
+                      title={isSelf ? "You can't delete your own account" : "Delete"}
+                      disabled={isSelf}
+                      onClick={() => setDeleting(u)}
                     />
-                    <input
-                      className="rounded-lg border border-gray-300 px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-babyblue-500"
-                      placeholder="New password (leave blank to keep)"
-                      value={editPassword}
-                      onChange={(e) => setEditPassword(e.target.value)}
-                      minLength={6}
-                    />
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => handleSaveEdit(u.id)}
-                        disabled={savingEdit}
-                        className="flex items-center gap-1 rounded-lg bg-babyblue-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-babyblue-700 disabled:opacity-50"
-                      >
-                        <Check className="h-3.5 w-3.5" /> Save
-                      </button>
-                      <button
-                        onClick={() => setEditingId(null)}
-                        className="flex items-center gap-1 rounded-lg border border-gray-300 px-3 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-50"
-                      >
-                        <X className="h-3.5 w-3.5" /> Cancel
-                      </button>
-                    </div>
                   </div>
                 </li>
               );
-            }
-
-            return (
-              <li key={u.id} className="flex items-center justify-between gap-4 px-4 py-3">
-                <div className="flex items-center gap-3">
-                  <div
-                    className={`flex h-9 w-9 items-center justify-center rounded-full ${
-                      isAdmin ? "bg-beige-100 text-beige-700" : "bg-babyblue-100 text-babyblue-700"
-                    }`}
-                  >
-                    {isAdmin ? (
-                      <ShieldCheck className="h-4 w-4" />
-                    ) : (
-                      <UserRound className="h-4 w-4" />
-                    )}
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-900">{u.name || u.username}</p>
-                    <p className="text-xs text-gray-400">
-                      {u.username} · <span className="uppercase tracking-wide">{u.role}</span>
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-1.5">
-                  <button
-                    onClick={() => startEdit(u)}
-                    aria-label="Edit user"
-                    className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-50 hover:text-gray-700"
-                  >
-                    <Pencil className="h-4 w-4" />
-                  </button>
-                  {!isSelf && (
-                    <button
-                      onClick={() => handleDelete(u.id)}
-                      disabled={deletingId === u.id}
-                      aria-label="Delete user"
-                      className="rounded-lg p-1.5 text-gray-400 hover:bg-beige-100 hover:text-beige-800 disabled:opacity-50"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  )}
-                </div>
-              </li>
-            );
-          })}
-        </ul>
+            })}
+          </ul>
+        </Card>
       </div>
+
+      <ConfirmDialog
+        open={deleting !== null}
+        onClose={() => setDeleting(null)}
+        onConfirm={() => handleDelete(deleting!.id)}
+        title={`Delete ${deleting?.name || deleting?.username || "user"}?`}
+        description="They will no longer be able to sign in. This can't be undone."
+        confirmLabel="Delete user"
+      />
     </div>
   );
 }

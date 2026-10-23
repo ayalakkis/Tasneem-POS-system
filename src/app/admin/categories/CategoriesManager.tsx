@@ -1,17 +1,12 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Plus, Pencil, Trash2, Tag, Check, X } from "lucide-react";
+import { Plus, Pencil, Trash2, Tag, ArrowUpRight } from "lucide-react";
+import { Alert, Button, ConfirmDialog, Input } from "@/components/ui";
 
 type Category = { id: string; name: string; itemCount: number };
-
-const BADGE_COLORS = [
-  "bg-babyblue-100 text-babyblue-700",
-  "bg-beige-100 text-beige-700",
-  "bg-babyblue-200 text-babyblue-800",
-  "bg-beige-200 text-beige-800",
-];
 
 export default function CategoriesManager({
   initialCategories,
@@ -26,6 +21,7 @@ export default function CategoriesManager({
   const [submitting, setSubmitting] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingName, setEditingName] = useState("");
+  const [deleting, setDeleting] = useState<Category | null>(null);
 
   function sortByName(list: Category[]) {
     return [...list].sort((a, b) => a.name.localeCompare(b.name));
@@ -61,7 +57,8 @@ export default function CategoriesManager({
     setError(null);
   }
 
-  async function handleSaveEdit(id: string) {
+  async function handleSaveEdit(e: FormEvent, id: string) {
+    e.preventDefault();
     setError(null);
     const res = await fetch(`/api/categories/${id}`, {
       method: "PATCH",
@@ -83,16 +80,9 @@ export default function CategoriesManager({
   }
 
   async function handleDelete(id: string) {
-    if (!confirm("Delete this category?")) return;
-    setError(null);
-
     const res = await fetch(`/api/categories/${id}`, { method: "DELETE" });
     const data = await res.json().catch(() => ({}));
-
-    if (!res.ok) {
-      setError(data.error ?? "Failed to delete category");
-      return;
-    }
+    if (!res.ok) throw new Error(data.error ?? "Failed to delete category");
 
     setCategories((prev) => prev.filter((c) => c.id !== id));
     router.refresh();
@@ -101,115 +91,135 @@ export default function CategoriesManager({
   return (
     <div>
       {error && (
-        <div className="mb-4 rounded-lg bg-beige-100 px-3 py-2 text-sm text-beige-900">{error}</div>
+        <Alert tone="danger" className="mb-4">
+          {error}
+        </Alert>
       )}
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {categories.map((category, i) => (
-          <div
+      <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        {categories.map((category) => (
+          <li
             key={category.id}
-            className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm"
+            className="group flex min-h-[148px] flex-col rounded-xl border border-border bg-surface p-5 shadow-sm transition-shadow hover:shadow-md"
           >
             {editingId === category.id ? (
-              <div className="space-y-3">
-                <input
-                  className="w-full rounded-lg border border-gray-300 px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-babyblue-500"
+              <form onSubmit={(e) => handleSaveEdit(e, category.id)} className="flex flex-1 flex-col gap-3">
+                <Input
+                  aria-label="Category name"
                   value={editingName}
                   onChange={(e) => setEditingName(e.target.value)}
+                  onKeyDown={(e) => e.key === "Escape" && setEditingId(null)}
                   autoFocus
+                  required
                 />
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => handleSaveEdit(category.id)}
-                    className="flex items-center gap-1 rounded-lg bg-babyblue-600 px-2.5 py-1.5 text-xs font-medium text-white hover:bg-babyblue-700"
-                  >
-                    <Check className="h-3.5 w-3.5" /> Save
-                  </button>
-                  <button
-                    onClick={() => setEditingId(null)}
-                    className="flex items-center gap-1 rounded-lg border border-gray-300 px-2.5 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-50"
-                  >
-                    <X className="h-3.5 w-3.5" /> Cancel
-                  </button>
+                <div className="mt-auto flex gap-2">
+                  <Button type="submit" size="sm" className="flex-1">
+                    Save
+                  </Button>
+                  <Button variant="ghost" size="sm" onClick={() => setEditingId(null)}>
+                    Cancel
+                  </Button>
                 </div>
-              </div>
+              </form>
             ) : (
               <>
                 <div className="flex items-start justify-between">
-                  <div
-                    className={`flex h-10 w-10 items-center justify-center rounded-full ${BADGE_COLORS[i % BADGE_COLORS.length]}`}
-                  >
-                    <Tag className="h-5 w-5" />
+                  <div className="flex size-10 items-center justify-center rounded-lg bg-primary-soft text-primary-soft-fg">
+                    <Tag className="size-[18px]" strokeWidth={1.75} aria-hidden />
                   </div>
-                  <div className="flex gap-1">
-                    <button
+                  <div className="flex gap-0.5 opacity-100 transition-opacity sm:opacity-0 sm:group-focus-within:opacity-100 sm:group-hover:opacity-100">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      iconOnly
+                      icon={Pencil}
+                      aria-label={`Rename ${category.name}`}
+                      title="Rename"
                       onClick={() => startEdit(category)}
-                      aria-label="Edit category"
-                      className="rounded-lg p-1.5 text-gray-400 hover:bg-gray-50 hover:text-gray-700"
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(category.id)}
-                      aria-label="Delete category"
-                      className="rounded-lg p-1.5 text-gray-400 hover:bg-beige-100 hover:text-beige-800"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
+                    />
+                    <Button
+                      variant="danger-ghost"
+                      size="sm"
+                      iconOnly
+                      icon={Trash2}
+                      aria-label={`Delete ${category.name}`}
+                      title={category.itemCount > 0 ? "Move or delete its items first" : "Delete"}
+                      disabled={category.itemCount > 0}
+                      onClick={() => setDeleting(category)}
+                    />
                   </div>
                 </div>
-                <p className="mt-3 text-sm font-semibold text-gray-900">{category.name}</p>
-                <p className="mt-0.5 text-xs text-gray-400">
-                  {category.itemCount} item{category.itemCount === 1 ? "" : "s"}
-                </p>
+                <p className="mt-4 font-semibold text-fg">{category.name}</p>
+                <Link
+                  href={`/admin/items?categoryId=${category.id}`}
+                  className="mt-auto inline-flex items-center gap-1 self-start pt-1 text-sm text-fg-muted hover:text-primary"
+                >
+                  <span className="tabular-nums">{category.itemCount}</span>
+                  item{category.itemCount === 1 ? "" : "s"}
+                  <ArrowUpRight className="size-3.5" aria-hidden />
+                </Link>
               </>
             )}
-          </div>
+          </li>
         ))}
 
-        {adding ? (
-          <form
-            onSubmit={handleAdd}
-            className="flex flex-col justify-center rounded-xl border-2 border-dashed border-babyblue-300 bg-babyblue-50/40 p-4"
-          >
-            <input
-              className="w-full rounded-lg border border-gray-300 px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-babyblue-500"
-              placeholder="Category name"
-              value={newName}
-              onChange={(e) => setNewName(e.target.value)}
-              autoFocus
-              required
-            />
-            <div className="mt-3 flex gap-2">
-              <button
-                type="submit"
-                disabled={submitting}
-                className="flex-1 rounded-lg bg-babyblue-600 px-2.5 py-1.5 text-xs font-medium text-white hover:bg-babyblue-700 disabled:opacity-50"
-              >
-                {submitting ? "Adding..." : "Add"}
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setAdding(false);
-                  setNewName("");
+        <li>
+          {adding ? (
+            <form
+              onSubmit={handleAdd}
+              className="flex h-full min-h-[148px] flex-col gap-3 rounded-xl border border-dashed border-primary/40 bg-primary-soft/40 p-5"
+            >
+              <Input
+                aria-label="New category name"
+                placeholder="Category name"
+                value={newName}
+                onChange={(e) => setNewName(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Escape") {
+                    setAdding(false);
+                    setNewName("");
+                  }
                 }}
-                className="rounded-lg border border-gray-300 px-2.5 py-1.5 text-xs font-medium text-gray-600 hover:bg-white"
-              >
-                Cancel
-              </button>
-            </div>
-          </form>
-        ) : (
-          <button
-            onClick={() => setAdding(true)}
-            className="flex min-h-[128px] flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-gray-200 text-gray-400 hover:border-babyblue-300 hover:bg-babyblue-50/40 hover:text-babyblue-600"
-          >
-            <Plus className="h-6 w-6" />
-            <span className="text-sm font-medium">Add category</span>
-          </button>
-        )}
-      </div>
+                autoFocus
+                required
+              />
+              <div className="mt-auto flex gap-2">
+                <Button type="submit" size="sm" loading={submitting} className="flex-1">
+                  Add
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    setAdding(false);
+                    setNewName("");
+                  }}
+                >
+                  Cancel
+                </Button>
+              </div>
+            </form>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setAdding(true)}
+              className="flex h-full min-h-[148px] w-full flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-border-strong text-fg-subtle transition-colors hover:border-primary/50 hover:bg-primary-soft/40 hover:text-primary"
+            >
+              <Plus className="size-5" aria-hidden />
+              <span className="text-sm font-medium">Add category</span>
+            </button>
+          )}
+        </li>
+      </ul>
+
+      <ConfirmDialog
+        open={deleting !== null}
+        onClose={() => setDeleting(null)}
+        onConfirm={() => handleDelete(deleting!.id)}
+        title={`Delete “${deleting?.name ?? ""}”?`}
+        description="This can't be undone."
+        confirmLabel="Delete category"
+      />
     </div>
   );
 }

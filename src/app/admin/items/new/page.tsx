@@ -1,5 +1,6 @@
-import Link from "next/link";
+import { ArrowLeft, Tags } from "lucide-react";
 import { prisma } from "@/lib/prisma";
+import { Card, EmptyState, LinkButton, PageHeader } from "@/components/ui";
 import ItemForm from "../ItemForm";
 
 export default async function NewItemPage() {
@@ -7,19 +8,27 @@ export default async function NewItemPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-semibold text-gray-900">Add item</h1>
+      <PageHeader
+        eyebrow="Catalog"
+        title="Add item"
+        description="New items start with zero stock. Record a purchase to add units."
+        actions={
+          <LinkButton href="/admin/items" variant="ghost" icon={ArrowLeft}>
+            Back to items
+          </LinkButton>
+        }
+      />
       {categories.length === 0 ? (
-        <p className="mt-4 text-sm text-gray-600">
-          You need at least one category before adding items.{" "}
-          <Link href="/admin/categories" className="underline">
-            Create one here
-          </Link>
-          .
-        </p>
+        <Card>
+          <EmptyState
+            icon={Tags}
+            title="Create a category first"
+            description="Every item belongs to a category, so you need at least one before adding items."
+            action={<LinkButton href="/admin/categories">Go to categories</LinkButton>}
+          />
+        </Card>
       ) : (
-        <div className="mt-6">
-          <ItemForm categories={categories} />
-        </div>
+        <ItemForm categories={categories} />
       )}
     </div>
   );

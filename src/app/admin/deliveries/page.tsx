@@ -2,6 +2,7 @@ import { Timer, Truck, PackageCheck, XCircle } from "lucide-react";
 import { getDeliveries } from "@/lib/deliveries";
 import StatCard from "@/components/layout/StatCard";
 import DeliveryTable from "@/components/pos/DeliveryTable";
+import { PageHeader } from "@/components/ui";
 
 export default async function AdminDeliveriesPage() {
   const deliveries = await getDeliveries();
@@ -14,37 +15,16 @@ export default async function AdminDeliveriesPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-semibold text-gray-900">Deliveries</h1>
-      <p className="mt-1 text-sm text-gray-500">All delivery orders and their status.</p>
+      <PageHeader eyebrow="People & orders" title="Deliveries" description="All delivery orders and their status." />
 
-      <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
-        <StatCard
-          label="Pending"
-          value={counts.PENDING}
-          icon={Timer}
-          color="bg-beige-100 text-beige-700"
-        />
-        <StatCard
-          label="Out for delivery"
-          value={counts.OUT_FOR_DELIVERY}
-          icon={Truck}
-          color="bg-babyblue-100 text-babyblue-700"
-        />
-        <StatCard
-          label="Delivered"
-          value={counts.DELIVERED}
-          icon={PackageCheck}
-          color="bg-babyblue-200 text-babyblue-800"
-        />
-        <StatCard
-          label="Cancelled"
-          value={counts.CANCELLED}
-          icon={XCircle}
-          color="bg-beige-200 text-beige-800"
-        />
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <StatCard label="Pending" value={counts.PENDING} icon={Timer} tone="accent" />
+        <StatCard label="Out for delivery" value={counts.OUT_FOR_DELIVERY} icon={Truck} tone="info" />
+        <StatCard label="Delivered" value={counts.DELIVERED} icon={PackageCheck} tone="primary" />
+        <StatCard label="Cancelled" value={counts.CANCELLED} icon={XCircle} tone="danger" />
       </div>
 
-      <div className="mt-6">
+      <div className="mt-8">
         <DeliveryTable deliveries={deliveries} />
       </div>
     </div>

@@ -1,7 +1,10 @@
-import { ShoppingCart, PackagePlus, Wallet } from "lucide-react";
+import { ShoppingCart, PackagePlus, Wallet, ReceiptText } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import StatCard from "@/components/layout/StatCard";
+import { EmptyState, PageHeader, Table, TBody, TD, TH, THead, TR } from "@/components/ui";
 import PurchaseForm from "./PurchaseForm";
+
+const dateFormat = new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short", year: "numeric" });
 
 export default async function PurchasesPage() {
   const [purchases, items, supplierRows] = await Promise.all([
@@ -31,69 +34,64 @@ export default async function PurchasesPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-semibold text-gray-900">Purchase invoices</h1>
-      <p className="mt-1 text-sm text-gray-500">
-        Recording a purchase increases stock and updates the item&apos;s cost price.
-      </p>
+      <PageHeader
+        eyebrow="Catalog"
+        title="Purchases"
+        description="Recording a purchase increases stock and updates the item's cost price."
+      />
 
-      <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
         <StatCard label="Purchases this month" value={thisMonth.length} icon={ShoppingCart} />
-        <StatCard
-          label="Units received this month"
-          value={unitsThisMonth}
-          icon={PackagePlus}
-          color="bg-beige-100 text-beige-700"
-        />
-        <StatCard
-          label="Spent this month"
-          value={spentThisMonth.toFixed(2)}
-          icon={Wallet}
-          color="bg-babyblue-200 text-babyblue-800"
-        />
+        <StatCard label="Units received this month" value={unitsThisMonth} icon={PackagePlus} tone="info" />
+        <StatCard label="Spent this month" value={spentThisMonth.toFixed(2)} icon={Wallet} tone="accent" />
       </div>
 
-      <div className="mt-6">
+      <div className="mt-8">
         <PurchaseForm
           items={items.map((i) => ({ id: i.id, name: i.name, costPrice: i.costPrice }))}
           knownSuppliers={knownSuppliers}
         />
       </div>
 
-      <div className="mt-8 overflow-x-auto rounded-xl border border-gray-200 bg-white shadow-sm">
-        <table className="min-w-full divide-y divide-gray-200 text-sm">
-          <thead>
-            <tr className="text-left text-xs font-medium uppercase tracking-wide text-gray-500">
-              <th className="px-4 py-3">Date</th>
-              <th className="px-4 py-3">Item</th>
-              <th className="px-4 py-3">Qty</th>
-              <th className="px-4 py-3">Unit cost</th>
-              <th className="px-4 py-3">Total paid</th>
-              <th className="px-4 py-3">Supplier</th>
-              <th className="px-4 py-3">Recorded by</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-200">
+      <h2 className="mb-3 mt-10 text-sm font-semibold text-fg">History</h2>
+      {purchases.length === 0 ? (
+        <div className="rounded-xl border border-border bg-surface shadow-sm">
+          <EmptyState
+            icon={ReceiptText}
+            title="No purchases yet"
+            description="Purchases you record above will be listed here."
+          />
+        </div>
+      ) : (
+        <Table>
+          <THead>
+            <TR>
+              <TH>Date</TH>
+              <TH>Item</TH>
+              <TH numeric>Qty</TH>
+              <TH numeric>Unit cost</TH>
+              <TH numeric>Total paid</TH>
+              <TH>Supplier</TH>
+              <TH>Recorded by</TH>
+            </TR>
+          </THead>
+          <TBody>
             {purchases.map((p) => (
-              <tr key={p.id}>
-                <td className="px-4 py-3 text-gray-600">{p.date.toLocaleDateString()}</td>
-                <td className="px-4 py-3 font-medium text-gray-900">{p.item.name}</td>
-                <td className="px-4 py-3 text-gray-600">{p.quantity}</td>
-                <td className="px-4 py-3 text-gray-600">{p.unitCost.toFixed(2)}</td>
-                <td className="px-4 py-3 text-gray-600">{p.totalPaid.toFixed(2)}</td>
-                <td className="px-4 py-3 text-gray-600">{p.supplier ?? "—"}</td>
-                <td className="px-4 py-3 text-gray-600">{p.createdBy.username}</td>
-              </tr>
+              <TR key={p.id}>
+                <TD className="whitespace-nowrap tabular-nums">{dateFormat.format(p.date)}</TD>
+                <TD className="font-medium text-fg">{p.item.name}</TD>
+                <TD numeric>{p.quantity}</TD>
+                <TD numeric>{p.unitCost.toFixed(2)}</TD>
+                <TD numeric className="font-medium text-fg">
+                  {p.totalPaid.toFixed(2)}
+                </TD>
+                <TD>{p.supplier ?? <span className="text-fg-subtle">—</span>}</TD>
+                <TD>{p.createdBy.username}</TD>
+              </TR>
             ))}
-            {purchases.length === 0 && (
-              <tr>
-                <td colSpan={7} className="px-4 py-6 text-center text-gray-400">
-                  No purchase invoices yet.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+          </TBody>
+        </Table>
+      )}
     </div>
   );
 }
