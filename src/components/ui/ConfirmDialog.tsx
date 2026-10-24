@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { TriangleAlert } from "lucide-react";
 import { Alert } from "./Alert";
 import { Button } from "./Button";
+import { useI18n } from "@/i18n/I18nProvider";
 
 /**
  * Modal confirmation built on <dialog>, which gives focus trapping, Escape to
@@ -18,7 +19,7 @@ export function ConfirmDialog({
   onConfirm,
   title,
   description,
-  confirmLabel = "Delete",
+  confirmLabel,
   tone = "danger",
 }: {
   open: boolean;
@@ -29,6 +30,7 @@ export function ConfirmDialog({
   confirmLabel?: string;
   tone?: "danger" | "primary";
 }) {
+  const { t } = useI18n();
   const ref = useRef<HTMLDialogElement>(null);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -47,7 +49,7 @@ export function ConfirmDialog({
       await onConfirm();
       onClose();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Something went wrong");
+      setError(e instanceof Error ? e.message : t.common.somethingWrong);
     } finally {
       setPending(false);
     }
@@ -90,10 +92,10 @@ export function ConfirmDialog({
       </div>
       <div className="flex justify-end gap-2 rounded-b-2xl border-t border-border bg-surface-2 px-6 py-3">
         <Button variant="ghost" onClick={close} disabled={pending}>
-          Cancel
+          {t.common.cancel}
         </Button>
         <Button variant={tone === "danger" ? "danger" : "primary"} onClick={confirm} loading={pending} autoFocus>
-          {confirmLabel}
+          {confirmLabel ?? t.common.delete}
         </Button>
       </div>
     </dialog>

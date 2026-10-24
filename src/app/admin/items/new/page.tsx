@@ -1,20 +1,24 @@
 import { ArrowLeft, Tags } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { Card, EmptyState, LinkButton, PageHeader } from "@/components/ui";
+import { getI18n } from "@/i18n/server";
 import ItemForm from "../ItemForm";
 
 export default async function NewItemPage() {
-  const categories = await prisma.category.findMany({ orderBy: { name: "asc" } });
+  const [categories, { t }] = await Promise.all([
+    prisma.category.findMany({ orderBy: { name: "asc" } }),
+    getI18n(),
+  ]);
 
   return (
     <div>
       <PageHeader
-        eyebrow="Catalog"
-        title="Add item"
-        description="New items start with zero stock. Record a purchase to add units."
+        eyebrow={t.nav.catalog}
+        title={t.items.newTitle}
+        description={t.items.newDescription}
         actions={
           <LinkButton href="/admin/items" variant="ghost" icon={ArrowLeft}>
-            Back to items
+            {t.items.backToItems}
           </LinkButton>
         }
       />
@@ -22,9 +26,9 @@ export default async function NewItemPage() {
         <Card>
           <EmptyState
             icon={Tags}
-            title="Create a category first"
-            description="Every item belongs to a category, so you need at least one before adding items."
-            action={<LinkButton href="/admin/categories">Go to categories</LinkButton>}
+            title={t.items.needCategoryTitle}
+            description={t.items.needCategoryDescription}
+            action={<LinkButton href="/admin/categories">{t.items.goToCategories}</LinkButton>}
           />
         </Card>
       ) : (

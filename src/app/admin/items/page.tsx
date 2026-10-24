@@ -14,6 +14,8 @@ import {
   TR,
   TableEmpty,
 } from "@/components/ui";
+import { getI18n } from "@/i18n/server";
+import { fill } from "@/i18n/plural";
 import ItemsFilterBar from "./ItemsFilterBar";
 import DeleteItemButton from "./DeleteItemButton";
 
@@ -24,7 +26,7 @@ export default async function ItemsPage({
 }: {
   searchParams: Promise<{ q?: string; categoryId?: string }>;
 }) {
-  const { q = "", categoryId = "" } = await searchParams;
+  const [{ q = "", categoryId = "" }, { t, f }] = await Promise.all([searchParams, getI18n()]);
 
   const [items, categories, allItems] = await Promise.all([
     prisma.item.findMany({
@@ -47,37 +49,37 @@ export default async function ItemsPage({
   return (
     <div>
       <PageHeader
-        eyebrow="Catalog"
-        title="Items"
-        description="Manage products, pricing and barcodes."
+        eyebrow={t.nav.catalog}
+        title={t.items.title}
+        description={t.items.description}
         actions={
           <LinkButton href="/admin/items/new" icon={Plus}>
-            Add item
+            {t.items.addItem}
           </LinkButton>
         }
       />
 
       <div className="grid grid-cols-2 gap-x-6 gap-y-8 lg:grid-cols-4">
-        <StatCard label="Total items" value={allItems.length} icon={Package} />
-        <StatCard label="Units in stock" value={totalStock} icon={Boxes} tone="info" />
+        <StatCard label={t.items.totalItems} value={allItems.length} icon={Package} />
+        <StatCard label={t.items.unitsInStock} value={totalStock} icon={Boxes} tone="info" />
         <StatCard
-          label={`Low stock (under ${LOW_STOCK})`}
+          label={fill(t.items.lowStock, { n: LOW_STOCK })}
           value={lowStockCount}
           icon={AlertTriangle}
           tone={lowStockCount > 0 ? "danger" : "neutral"}
         />
-        <StatCard label="Inventory value" value={inventoryValue.toFixed(2)} icon={Coins} tone="accent" hint="At cost price" />
+        <StatCard label={t.items.inventoryValue} value={f.money(inventoryValue)} icon={Coins} tone="accent" hint={t.items.atCostPrice} />
       </div>
 
       {allItems.length === 0 ? (
         <div className="mt-6 border-t border-border">
           <EmptyState
             icon={Package}
-            title="No items yet"
-            description="Add your first product to start selling it at the POS."
+            title={t.items.emptyTitle}
+            description={t.items.emptyDescription}
             action={
               <LinkButton href="/admin/items/new" icon={Plus}>
-                Add item
+                {t.items.addItem}
               </LinkButton>
             }
           />
@@ -91,14 +93,14 @@ export default async function ItemsPage({
           <Table className="mt-4">
             <THead>
               <TR>
-                <TH>Name</TH>
-                <TH>Category</TH>
-                <TH>Barcode</TH>
-                <TH numeric>Cost</TH>
-                <TH numeric>Price</TH>
-                <TH numeric>Stock</TH>
+                <TH>{t.items.colName}</TH>
+                <TH>{t.items.colCategory}</TH>
+                <TH>{t.items.colBarcode}</TH>
+                <TH numeric>{t.items.colCost}</TH>
+                <TH numeric>{t.items.colPrice}</TH>
+                <TH numeric>{t.items.colStock}</TH>
                 <TH>
-                  <span className="sr-only">Actions</span>
+                  <span className="sr-only">{t.common.actions}</span>
                 </TH>
               </TR>
             </THead>
@@ -108,9 +110,9 @@ export default async function ItemsPage({
                   <TD className="font-medium text-fg">{item.name}</TD>
                   <TD>{item.category.name}</TD>
                   <TD className="tabular-nums text-fg-subtle">{item.barcode ?? ""}</TD>
-                  <TD numeric>{item.costPrice.toFixed(2)}</TD>
+                  <TD numeric>{f.money(item.costPrice)}</TD>
                   <TD numeric className="font-medium text-fg">
-                    {item.sellingPrice.toFixed(2)}
+                    {f.money(item.sellingPrice)}
                   </TD>
                   <TD numeric>
                     <Badge
@@ -129,8 +131,8 @@ export default async function ItemsPage({
                         size="sm"
                         iconOnly
                         icon={Pencil}
-                        aria-label={`Edit ${item.name}`}
-                        title="Edit"
+                        aria-label={fill(t.items.editNamed, { name: item.name })}
+                        title={t.common.edit}
                       />
                       <DeleteItemButton itemId={item.id} itemName={item.name} />
                     </div>
@@ -140,7 +142,7 @@ export default async function ItemsPage({
               {items.length === 0 && (
                 <TableEmpty colSpan={7}>
                   <PackageSearch className="mx-auto mb-2 size-5 text-fg-subtle" aria-hidden />
-                  {filtering ? "No items match these filters." : "No items found."}
+                  {filtering ? t.items.noMatch : t.items.noneFound}
                 </TableEmpty>
               )}
             </TBody>

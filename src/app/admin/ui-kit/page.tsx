@@ -96,7 +96,7 @@ export default function UiKitPage() {
           <Field label="Selling price" htmlFor="kit-price" error="Price must be greater than 0.">
             <Input id="kit-price" type="number" defaultValue="0" invalid />
           </Field>
-          <Field label="Notes" htmlFor="kit-notes" optional className="sm:col-span-2">
+          <Field label="Notes" htmlFor="kit-notes" optional="Optional" className="sm:col-span-2">
             <Textarea id="kit-notes" placeholder="اسم المنتج بالعربية. Arabic renders in the same font" />
           </Field>
         </CardBody>
@@ -174,7 +174,7 @@ export default function UiKitPage() {
           <CardBody className="pt-4">
             <ProfitTrendChart
               data={Array.from({ length: 30 }, (_, i) => ({
-                label: `Oct ${i + 1}`,
+                day: `2026-10-${String(i + 1).padStart(2, "0")}`,
                 profit: Math.round(80 + 60 * Math.sin(i / 3) + i * 4),
               }))}
             />

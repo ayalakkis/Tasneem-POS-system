@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { LinkButton, PageHeader } from "@/components/ui";
+import { getI18n } from "@/i18n/server";
 import ItemForm from "../ItemForm";
 
 export default async function EditItemPage({
@@ -11,9 +12,10 @@ export default async function EditItemPage({
 }) {
   const { id } = await params;
 
-  const [item, categories] = await Promise.all([
+  const [item, categories, { t }] = await Promise.all([
     prisma.item.findUnique({ where: { id } }),
     prisma.category.findMany({ orderBy: { name: "asc" } }),
+    getI18n(),
   ]);
 
   if (!item) notFound();
@@ -21,12 +23,12 @@ export default async function EditItemPage({
   return (
     <div>
       <PageHeader
-        eyebrow="Catalog"
+        eyebrow={t.nav.catalog}
         title={item.name}
-        description="Edit details and pricing."
+        description={t.items.editDescription}
         actions={
           <LinkButton href="/admin/items" variant="ghost" icon={ArrowLeft}>
-            Back to items
+            {t.items.backToItems}
           </LinkButton>
         }
       />

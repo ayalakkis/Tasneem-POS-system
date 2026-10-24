@@ -2,9 +2,11 @@ import { Tags, Package, Star } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import StatCard from "@/components/layout/StatCard";
 import { PageHeader } from "@/components/ui";
+import { getI18n } from "@/i18n/server";
 import CategoriesManager from "./CategoriesManager";
 
 export default async function CategoriesPage() {
+  const { t, n } = await getI18n();
   const categories = await prisma.category.findMany({
     orderBy: { name: "asc" },
     include: { _count: { select: { items: true } } },
@@ -15,17 +17,17 @@ export default async function CategoriesPage() {
 
   return (
     <div>
-      <PageHeader eyebrow="Catalog" title="Categories" description="Group items so they're easy to find and report on." />
+      <PageHeader eyebrow={t.nav.catalog} title={t.categories.title} description={t.categories.description} />
 
       <div className="grid grid-cols-2 gap-x-6 gap-y-8 lg:grid-cols-3">
-        <StatCard label="Categories" value={categories.length} icon={Tags} />
-        <StatCard label="Items across categories" value={totalItems} icon={Package} tone="info" />
+        <StatCard label={t.categories.count} value={categories.length} icon={Tags} />
+        <StatCard label={t.categories.itemsAcross} value={totalItems} icon={Package} tone="info" />
         <StatCard
-          label="Largest category"
-          value={topCategory ? topCategory.name : "None"}
+          label={t.categories.largest}
+          value={topCategory ? topCategory.name : t.common.none}
           icon={Star}
           tone="accent"
-          hint={topCategory ? `${topCategory._count.items} items` : undefined}
+          hint={topCategory ? n(t.units, topCategory._count.items) : undefined}
         />
       </div>
 

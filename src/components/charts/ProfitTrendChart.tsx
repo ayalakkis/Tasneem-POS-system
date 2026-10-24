@@ -4,7 +4,13 @@ import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { useI18n } from "@/i18n/I18nProvider";
 import ChartTooltip from "./ChartTooltip";
 
-type Point = { label: string; profit: number };
+type Point = { day: string; profit: number };
+
+/** "YYYY-MM-DD" → local Date (not `new Date(key)`, which parses as UTC). */
+function parseDay(key: string) {
+  const [y, m, d] = key.split("-").map(Number);
+  return new Date(y, m - 1, d);
+}
 
 const AXIS_TICK = { fontSize: 11, fill: "var(--chart-axis)" };
 
@@ -15,7 +21,9 @@ const AXIS_TICK = { fontSize: 11, fill: "var(--chart-axis)" };
  * value axis moves to the right edge.
  */
 export default function ProfitTrendChart({ data }: { data: Point[] }) {
-  const rtl = useI18n().dir === "rtl";
+  const { dir, f, t } = useI18n();
+  const rtl = dir === "rtl";
+  const formatDay = (key: string | number) => f.dayMonth(parseDay(String(key)));
   return (
     <div dir="ltr">
       <ResponsiveContainer width="100%" height={260}>
@@ -31,7 +39,8 @@ export default function ProfitTrendChart({ data }: { data: Point[] }) {
           </defs>
           <CartesianGrid vertical={false} stroke="var(--chart-grid)" />
           <XAxis
-            dataKey="label"
+            dataKey="day"
+              tickFormatter={formatDay}
             tick={AXIS_TICK}
             axisLine={false}
             tickLine={false}
@@ -50,7 +59,7 @@ export default function ProfitTrendChart({ data }: { data: Point[] }) {
           />
           <Tooltip
             cursor={{ stroke: "var(--chart-axis)", strokeWidth: 1, strokeDasharray: "3 3" }}
-            content={<ChartTooltip valueLabel="Profit" />}
+            content={<ChartTooltip valueLabel={t.dashboard.profit} formatLabel={formatDay} />}
           />
           <Area
             type="monotone"

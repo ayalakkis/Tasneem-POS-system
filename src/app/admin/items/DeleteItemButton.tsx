@@ -4,6 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Trash2 } from "lucide-react";
 import { Button, ConfirmDialog } from "@/components/ui";
+import { useI18n } from "@/i18n/I18nProvider";
+import { fill } from "@/i18n/plural";
 
 export default function DeleteItemButton({
   itemId,
@@ -13,13 +15,14 @@ export default function DeleteItemButton({
   itemName: string;
 }) {
   const router = useRouter();
+  const { t } = useI18n();
   const [open, setOpen] = useState(false);
 
   async function handleDelete() {
     const res = await fetch(`/api/items/${itemId}`, { method: "DELETE" });
     if (!res.ok) {
       const data = await res.json().catch(() => ({}));
-      throw new Error(data.error ?? "Failed to delete item");
+      throw new Error(data.error ?? t.items.deleteFailed);
     }
     router.refresh();
   }
@@ -31,17 +34,17 @@ export default function DeleteItemButton({
         size="sm"
         iconOnly
         icon={Trash2}
-        aria-label={`Delete ${itemName}`}
-        title="Delete"
+        aria-label={fill(t.items.deleteNamed, { name: itemName })}
+        title={t.common.delete}
         onClick={() => setOpen(true)}
       />
       <ConfirmDialog
         open={open}
         onClose={() => setOpen(false)}
         onConfirm={handleDelete}
-        title={`Delete “${itemName}”?`}
-        description="This can't be undone. Items with purchase or sales history can't be deleted."
-        confirmLabel="Delete item"
+        title={fill(t.items.deleteTitle, { name: itemName })}
+        description={t.items.deleteDescription}
+        confirmLabel={t.items.deleteConfirm}
       />
     </>
   );

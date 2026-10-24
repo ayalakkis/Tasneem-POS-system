@@ -4,6 +4,8 @@ import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { List, PackagePlus } from "lucide-react";
 import { Alert, Button, Card, CardBody, CardHeader, Field, Input, Select } from "@/components/ui";
+import { useI18n } from "@/i18n/I18nProvider";
+import { fill } from "@/i18n/plural";
 
 type Item = { id: string; name: string; costPrice: number };
 
@@ -21,6 +23,7 @@ export default function PurchaseForm({
   knownSuppliers: string[];
 }) {
   const router = useRouter();
+  const { t, f } = useI18n();
   const [itemId, setItemId] = useState(items[0]?.id ?? "");
   const [quantity, setQuantity] = useState("1");
   const [unitCost, setUnitCost] = useState(items[0] ? String(items[0].costPrice) : "");
@@ -69,12 +72,12 @@ export default function PurchaseForm({
 
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        setError(data.error ?? "Failed to record purchase");
+        setError(data.error ?? t.purchases.recordFailed);
         return;
       }
 
       const itemName = items.find((i) => i.id === itemId)?.name ?? "item";
-      setSuccess(`Recorded ${payload.quantity} × ${itemName}. Stock and cost price are updated.`);
+      setSuccess(fill(t.purchases.recorded, { qty: payload.quantity, item: itemName }));
       setQuantity("1");
       setTotalPaid("");
       setTotalPaidTouched(false);
@@ -82,26 +85,26 @@ export default function PurchaseForm({
       setSupplierMode(knownSuppliers.length > 0 ? "select" : "custom");
       router.refresh();
     } catch {
-      setError("Failed to record purchase. Check your connection and try again.");
+      setError(t.purchases.connectionFailed);
     } finally {
       setSubmitting(false);
     }
   }
 
   if (items.length === 0) {
-    return <Alert tone="info">Add an item first before recording a purchase.</Alert>;
+    return <Alert tone="info">{t.purchases.needItem}</Alert>;
   }
 
   return (
     <Card>
-      <CardHeader title="Record a purchase" description="Total paid defaults to quantity × unit cost." />
+      <CardHeader title={t.purchases.formTitle} description={t.purchases.formDescription} />
       <CardBody>
         <form onSubmit={handleSubmit} className="space-y-5">
           {error && <Alert tone="danger">{error}</Alert>}
           {success && <Alert tone="success">{success}</Alert>}
 
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
-            <Field label="Item" htmlFor="purchase-item" className="col-span-2 sm:col-span-3 lg:col-span-2">
+            <Field label={t.purchases.item} htmlFor="purchase-item" className="col-span-2 sm:col-span-3 lg:col-span-2">
               <Select id="purchase-item" value={itemId} onChange={(e) => handleItemChange(e.target.value)}>
                 {items.map((i) => (
                   <option key={i.id} value={i.id}>
@@ -111,7 +114,7 @@ export default function PurchaseForm({
               </Select>
             </Field>
 
-            <Field label="Quantity" htmlFor="purchase-qty">
+            <Field label={t.purchases.quantity} htmlFor="purchase-qty">
               <Input
                 id="purchase-qty"
                 type="number"
@@ -123,7 +126,7 @@ export default function PurchaseForm({
               />
             </Field>
 
-            <Field label="Unit cost" htmlFor="purchase-cost">
+            <Field label={t.purchases.unitCost} htmlFor="purchase-cost">
               <Input
                 id="purchase-cost"
                 type="number"
@@ -135,13 +138,13 @@ export default function PurchaseForm({
               />
             </Field>
 
-            <Field label="Total paid" htmlFor="purchase-total">
+            <Field label={t.purchases.totalPaid} htmlFor="purchase-total">
               <Input
                 id="purchase-total"
                 type="number"
                 min="0"
                 step="0.01"
-                placeholder={computedTotal.toFixed(2)}
+                placeholder={f.money(computedTotal)}
                 value={totalPaid}
                 onChange={(e) => {
                   setTotalPaid(e.target.value);
@@ -150,11 +153,11 @@ export default function PurchaseForm({
               />
             </Field>
 
-            <Field label="Date" htmlFor="purchase-date">
+            <Field label={t.purchases.date} htmlFor="purchase-date">
               <Input id="purchase-date" type="date" value={date} onChange={(e) => setDate(e.target.value)} required />
             </Field>
 
-            <Field label="Supplier / origin" htmlFor="purchase-supplier" optional className="col-span-2 sm:col-span-3">
+            <Field label={t.purchases.supplier} htmlFor="purchase-supplier" optional={t.common.optional} className="col-span-2 sm:col-span-3">
               {supplierMode === "select" ? (
                 <Select
                   id="purchase-supplier"
@@ -168,20 +171,20 @@ export default function PurchaseForm({
                     }
                   }}
                 >
-                  <option value="">None</option>
+                  <option value="">{t.common.none}</option>
                   {knownSuppliers.map((s) => (
                     <option key={s} value={s}>
                       {s}
                     </option>
                   ))}
-                  <option value={NEW_SUPPLIER}>+ Add new supplier…</option>
+                  <option value={NEW_SUPPLIER}>{t.purchases.addSupplier}</option>
                 </Select>
               ) : (
                 <div className="flex gap-2">
                   <Input
                     id="purchase-supplier"
                     className="flex-1"
-                    placeholder="New supplier name"
+                    placeholder={t.purchases.newSupplierPlaceholder}
                     value={supplier}
                     onChange={(e) => setSupplier(e.target.value)}
                     autoFocus={knownSuppliers.length > 0}
@@ -195,7 +198,7 @@ export default function PurchaseForm({
                         setSupplier("");
                       }}
                     >
-                      Pick existing
+                      {t.purchases.pickExisting}
                     </Button>
                   )}
                 </div>
@@ -204,7 +207,7 @@ export default function PurchaseForm({
 
             <div className="col-span-2 flex items-end sm:col-span-3">
               <Button type="submit" icon={PackagePlus} loading={submitting} className="w-full sm:ms-auto sm:w-auto">
-                Record purchase
+                {t.purchases.submit}
               </Button>
             </div>
           </div>

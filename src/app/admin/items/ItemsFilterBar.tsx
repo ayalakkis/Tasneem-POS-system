@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { Search } from "lucide-react";
 import { Input, Select } from "@/components/ui";
+import { useI18n } from "@/i18n/I18nProvider";
 
 type Category = { id: string; name: string };
 
@@ -17,6 +18,7 @@ export default function ItemsFilterBar({
   initialCategoryId: string;
 }) {
   const router = useRouter();
+  const { t } = useI18n();
   const pathname = usePathname();
   const [q, setQ] = useState(initialQuery);
   const [categoryId, setCategoryId] = useState(initialCategoryId);
@@ -33,9 +35,9 @@ export default function ItemsFilterBar({
       <Input
         icon={Search}
         type="search"
-        aria-label="Search items"
+        aria-label={t.items.search}
         className="flex-1"
-        placeholder="Search by name or barcode"
+        placeholder={t.items.searchPlaceholder}
         value={q}
         onChange={(e) => {
           setQ(e.target.value);
@@ -43,7 +45,7 @@ export default function ItemsFilterBar({
         }}
       />
       <Select
-        aria-label="Filter by category"
+        aria-label={t.items.filterCategory}
         className="sm:w-56"
         value={categoryId}
         onChange={(e) => {
@@ -51,7 +53,7 @@ export default function ItemsFilterBar({
           applyFilters(q, e.target.value);
         }}
       >
-        <option value="">All categories</option>
+        <option value="">{t.items.allCategories}</option>
         {categories.map((c) => (
           <option key={c.id} value={c.id}>
             {c.name}

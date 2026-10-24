@@ -121,7 +121,8 @@ export function Field({
   htmlFor: string;
   hint?: ReactNode;
   error?: ReactNode;
-  optional?: boolean;
+  /** Text for the "Optional" tag, e.g. `t.common.optional`. Omit for required fields. */
+  optional?: ReactNode;
   className?: string;
   children: ReactNode;
 }) {
@@ -129,7 +130,7 @@ export function Field({
     <div className={cn("flex flex-col gap-1.5", className)}>
       <label htmlFor={htmlFor} className="flex items-baseline justify-between text-sm font-medium text-fg">
         {label}
-        {optional && <span className="text-xs font-normal text-fg-subtle">Optional</span>}
+        {optional && <span className="text-xs font-normal text-fg-subtle">{optional}</span>}
       </label>
       {children}
       {error ? (

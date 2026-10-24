@@ -6,8 +6,10 @@ import ProfitTrendChart from "@/components/charts/ProfitTrendChart";
 import DeliveryStatusChart from "@/components/charts/DeliveryStatusChart";
 import CategoryRevenueChart from "@/components/charts/CategoryRevenueChart";
 import { Card, CardBody, CardHeader, LinkButton, PageHeader } from "@/components/ui";
+import { getI18n } from "@/i18n/server";
 
 export default async function AdminDashboardPage() {
+  const { t, f } = await getI18n();
   const ranges = getDateRanges();
   const last30Start = new Date();
   last30Start.setDate(last30Start.getDate() - 30);
@@ -23,39 +25,37 @@ export default async function AdminDashboardPage() {
   ]);
 
   const trendTotal = trend.reduce((sum, p) => sum + p.profit, 0);
-  const todayLabel = new Intl.DateTimeFormat("en", { weekday: "long", day: "numeric", month: "long" }).format(
-    new Date(),
-  );
+  const todayLabel = f.longDate(new Date());
 
   return (
     <div className="space-y-12">
       <PageHeader
         eyebrow={todayLabel}
-        title="Dashboard"
-        description="Profit is revenue minus the cost of goods sold."
+        title={t.dashboard.title}
+        description={t.dashboard.description}
         actions={
           <LinkButton href="/pos" variant="secondary" icon={Store} trailingIcon={ArrowRight}>
-            Open POS
+            {t.dashboard.openPos}
           </LinkButton>
         }
         className="mb-2"
       />
 
-      <section aria-label="Profit" className="grid grid-cols-2 gap-x-6 gap-y-8 lg:grid-cols-4">
-        <StatCard hero label="Profit today" value={today.toFixed(2)} icon={Clock} />
-        <StatCard label="This week" value={week.toFixed(2)} icon={CalendarDays} />
-        <StatCard label="This month" value={month.toFixed(2)} icon={CalendarRange} />
-        <StatCard label="This year" value={year.toFixed(2)} icon={TrendingUp} tone="accent" />
+      <section aria-label={t.dashboard.profitSection} className="grid grid-cols-2 gap-x-6 gap-y-8 lg:grid-cols-4">
+        <StatCard hero label={t.dashboard.profitToday} value={today.toFixed(2)} icon={Clock} />
+        <StatCard label={t.dashboard.thisWeek} value={week.toFixed(2)} icon={CalendarDays} />
+        <StatCard label={t.dashboard.thisMonth} value={month.toFixed(2)} icon={CalendarRange} />
+        <StatCard label={t.dashboard.thisYear} value={year.toFixed(2)} icon={TrendingUp} tone="accent" />
       </section>
 
       <div className="grid grid-cols-1 gap-x-10 gap-y-12 lg:grid-cols-3">
         <Card className="lg:col-span-2">
           <CardHeader
-            title="Profit, last 30 days"
-            description="Daily profit across all sales."
+            title={t.dashboard.trendTitle}
+            description={t.dashboard.trendDescription}
             actions={
               <div className="text-end">
-                <p className="text-xs text-fg-subtle">Total</p>
+                <p className="text-xs text-fg-subtle">{t.common.total}</p>
                 <p className="text-sm font-semibold tabular-nums text-fg">{trendTotal.toFixed(2)}</p>
               </div>
             }
@@ -66,7 +66,7 @@ export default async function AdminDashboardPage() {
         </Card>
 
         <Card>
-          <CardHeader title="Deliveries" description="All delivery orders by status." />
+          <CardHeader title={t.dashboard.deliveriesTitle} description={t.dashboard.deliveriesDescription} />
           <CardBody>
             <DeliveryStatusChart counts={deliveryCounts} />
           </CardBody>
@@ -74,7 +74,7 @@ export default async function AdminDashboardPage() {
       </div>
 
       <Card>
-        <CardHeader title="Revenue by category" description="Last 30 days, highest first." />
+        <CardHeader title={t.dashboard.categoryTitle} description={t.dashboard.categoryDescription} />
         <CardBody className="pt-4">
           <CategoryRevenueChart data={categoryRevenue} />
         </CardBody>

@@ -2,12 +2,11 @@ import { ShoppingCart, PackagePlus, Wallet, ReceiptText } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import StatCard from "@/components/layout/StatCard";
 import { EmptyState, PageHeader, Table, TBody, TD, TH, THead, TR } from "@/components/ui";
+import { getI18n } from "@/i18n/server";
 import PurchaseForm from "./PurchaseForm";
 
-const dateFormat = new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short", year: "numeric" });
-
 export default async function PurchasesPage() {
-  const [purchases, items, supplierRows] = await Promise.all([
+  const [purchases, items, supplierRows, { t, f }] = await Promise.all([
     prisma.purchaseInvoice.findMany({
       include: { item: true, createdBy: true },
       orderBy: { date: "desc" },
@@ -18,6 +17,7 @@ export default async function PurchasesPage() {
       select: { supplier: true },
       distinct: ["supplier"],
     }),
+    getI18n(),
   ]);
 
   const knownSuppliers = supplierRows
@@ -35,15 +35,15 @@ export default async function PurchasesPage() {
   return (
     <div>
       <PageHeader
-        eyebrow="Catalog"
-        title="Purchases"
-        description="Recording a purchase increases stock and updates the item's cost price."
+        eyebrow={t.nav.catalog}
+        title={t.purchases.title}
+        description={t.purchases.description}
       />
 
       <div className="grid grid-cols-2 gap-x-6 gap-y-8 lg:grid-cols-3">
-        <StatCard label="Purchases this month" value={thisMonth.length} icon={ShoppingCart} />
-        <StatCard label="Units received this month" value={unitsThisMonth} icon={PackagePlus} tone="info" />
-        <StatCard label="Spent this month" value={spentThisMonth.toFixed(2)} icon={Wallet} tone="accent" />
+        <StatCard label={t.purchases.thisMonth} value={thisMonth.length} icon={ShoppingCart} />
+        <StatCard label={t.purchases.unitsThisMonth} value={unitsThisMonth} icon={PackagePlus} tone="info" />
+        <StatCard label={t.purchases.spentThisMonth} value={f.money(spentThisMonth)} icon={Wallet} tone="accent" />
       </div>
 
       <div className="mt-8">
@@ -53,37 +53,37 @@ export default async function PurchasesPage() {
         />
       </div>
 
-      <h2 className="mb-3 mt-10 text-sm font-semibold text-fg">History</h2>
+      <h2 className="mb-3 mt-10 text-sm font-semibold text-fg">{t.purchases.history}</h2>
       {purchases.length === 0 ? (
         <div className="border-t border-border">
           <EmptyState
             icon={ReceiptText}
-            title="No purchases yet"
-            description="Purchases you record above will be listed here."
+            title={t.purchases.emptyTitle}
+            description={t.purchases.emptyDescription}
           />
         </div>
       ) : (
         <Table>
           <THead>
             <TR>
-              <TH>Date</TH>
-              <TH>Item</TH>
-              <TH numeric>Qty</TH>
-              <TH numeric>Unit cost</TH>
-              <TH numeric>Total paid</TH>
-              <TH>Supplier</TH>
-              <TH>Recorded by</TH>
+              <TH>{t.purchases.colDate}</TH>
+              <TH>{t.purchases.colItem}</TH>
+              <TH numeric>{t.purchases.colQty}</TH>
+              <TH numeric>{t.purchases.colUnitCost}</TH>
+              <TH numeric>{t.purchases.colTotalPaid}</TH>
+              <TH>{t.purchases.colSupplier}</TH>
+              <TH>{t.purchases.colRecordedBy}</TH>
             </TR>
           </THead>
           <TBody>
             {purchases.map((p) => (
               <TR key={p.id}>
-                <TD className="whitespace-nowrap tabular-nums">{dateFormat.format(p.date)}</TD>
+                <TD className="whitespace-nowrap tabular-nums">{f.date(p.date)}</TD>
                 <TD className="font-medium text-fg">{p.item.name}</TD>
                 <TD numeric>{p.quantity}</TD>
-                <TD numeric>{p.unitCost.toFixed(2)}</TD>
+                <TD numeric>{f.money(p.unitCost)}</TD>
                 <TD numeric className="font-medium text-fg">
-                  {p.totalPaid.toFixed(2)}
+                  {f.money(p.totalPaid)}
                 </TD>
                 <TD>{p.supplier ?? ""}</TD>
                 <TD>{p.createdBy.username}</TD>

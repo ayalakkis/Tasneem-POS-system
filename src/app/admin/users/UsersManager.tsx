@@ -199,7 +199,7 @@ export default function UsersManager({
                           />
                         </Field>
                       </div>
-                      <Field label="New password" htmlFor={`edit-password-${u.id}`} optional hint="Leave blank to keep the current one.">
+                      <Field label="New password" htmlFor={`edit-password-${u.id}`} optional="Optional" hint="Leave blank to keep the current one.">
                         <Input
                           id={`edit-password-${u.id}`}
                           size="sm"

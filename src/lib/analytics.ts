@@ -24,14 +24,12 @@ export async function getProfitByDay(days: number) {
   const events = await getProfitEvents(start, end);
 
   const dayKeys: string[] = [];
-  const labels = new Map<string, string>();
   const totals = new Map<string, number>();
   for (let i = 0; i < days; i++) {
     const d = new Date(start);
     d.setDate(d.getDate() + i);
     const key = localDateKey(d);
     dayKeys.push(key);
-    labels.set(key, d.toLocaleDateString(undefined, { month: "short", day: "numeric" }));
     totals.set(key, 0);
   }
 
@@ -41,7 +39,8 @@ export async function getProfitByDay(days: number) {
   }
 
   return dayKeys.map((key) => ({
-    label: labels.get(key)!,
+    /** Local calendar day, "YYYY-MM-DD"; formatted for display by the chart. */
+    day: key,
     profit: Math.round((totals.get(key) ?? 0) * 100) / 100,
   }));
 }

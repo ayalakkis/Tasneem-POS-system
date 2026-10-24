@@ -3,6 +3,7 @@
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { Alert, Badge, Button, Card, CardBody, CardFooter, CardHeader, Field, Input, Select, cn } from "@/components/ui";
+import { useI18n } from "@/i18n/I18nProvider";
 
 type Category = { id: string; name: string };
 
@@ -27,6 +28,7 @@ export default function ItemForm({
   quantityInStock?: number;
 }) {
   const router = useRouter();
+  const { t, f } = useI18n();
   const [values, setValues] = useState<ItemFormValues>(
     initialValues ?? {
       name: "",
@@ -68,7 +70,7 @@ export default function ItemForm({
 
     if (!res.ok) {
       const data = await res.json().catch(() => ({}));
-      setError(data.error ?? "Failed to save item");
+      setError(data.error ?? t.itemForm.saveFailed);
       return;
     }
 
@@ -87,13 +89,13 @@ export default function ItemForm({
       {error && <Alert tone="danger" className="lg:col-span-2">{error}</Alert>}
 
       <Card>
-        <CardHeader title="Details" description="How the item appears at the POS and on receipts." />
+        <CardHeader title={t.itemForm.detailsTitle} description={t.itemForm.detailsDescription} />
         <CardBody className="space-y-5">
-          <Field label="Name" htmlFor="item-name">
+          <Field label={t.itemForm.name} htmlFor="item-name">
             <Input id="item-name" value={values.name} onChange={(e) => update("name", e.target.value)} required />
           </Field>
 
-          <Field label="Category" htmlFor="item-category">
+          <Field label={t.itemForm.category} htmlFor="item-category">
             <Select
               id="item-category"
               value={values.categoryId}
@@ -101,7 +103,7 @@ export default function ItemForm({
               required
             >
               <option value="" disabled>
-                Select a category
+                {t.itemForm.selectCategory}
               </option>
               {categories.map((c) => (
                 <option key={c.id} value={c.id}>
@@ -112,7 +114,7 @@ export default function ItemForm({
           </Field>
 
           <div className="grid gap-5 sm:grid-cols-2">
-            <Field label="Barcode" htmlFor="item-barcode" optional hint="Scan it straight into this field.">
+            <Field label={t.itemForm.barcode} htmlFor="item-barcode" optional={t.common.optional} hint={t.itemForm.barcodeHint}>
               <Input
                 id="item-barcode"
                 inputMode="numeric"
@@ -121,7 +123,7 @@ export default function ItemForm({
                 onChange={(e) => update("barcode", e.target.value)}
               />
             </Field>
-            <Field label="Origin / source" htmlFor="item-origin" optional>
+            <Field label={t.itemForm.origin} htmlFor="item-origin" optional={t.common.optional}>
               <Input id="item-origin" value={values.origin} onChange={(e) => update("origin", e.target.value)} />
             </Field>
           </div>
@@ -129,10 +131,10 @@ export default function ItemForm({
       </Card>
 
       <Card className="self-start">
-        <CardHeader title="Pricing" description="Cost is never shown to cashiers." />
+        <CardHeader title={t.itemForm.pricingTitle} description={t.itemForm.pricingDescription} />
         <CardBody className="space-y-5">
           <div className="grid grid-cols-2 gap-4">
-            <Field label="Cost price" htmlFor="item-cost">
+            <Field label={t.itemForm.costPrice} htmlFor="item-cost">
               <Input
                 id="item-cost"
                 type="number"
@@ -143,7 +145,7 @@ export default function ItemForm({
                 required
               />
             </Field>
-            <Field label="Selling price" htmlFor="item-price">
+            <Field label={t.itemForm.sellingPrice} htmlFor="item-price">
               <Input
                 id="item-price"
                 type="number"
@@ -158,42 +160,42 @@ export default function ItemForm({
 
           <dl className="space-y-2 border-t border-border pt-4 text-sm">
             <div className="flex items-center justify-between">
-              <dt className="text-fg-muted">Margin per unit</dt>
+              <dt className="text-fg-muted">{t.itemForm.marginPerUnit}</dt>
               <dd className={cn("font-semibold tabular-nums", hasPrices && margin < 0 ? "text-danger" : "text-fg")}>
-                {hasPrices ? margin.toFixed(2) : <span className="font-normal text-fg-subtle">Not set</span>}
+                {hasPrices ? f.money(margin) : <span className="font-normal text-fg-subtle">{t.common.notSet}</span>}
               </dd>
             </div>
             <div className="flex items-center justify-between">
-              <dt className="text-fg-muted">Margin</dt>
+              <dt className="text-fg-muted">{t.itemForm.margin}</dt>
               <dd>
                 {hasPrices ? (
                   <Badge tone={margin < 0 ? "danger" : marginPct < 15 ? "accent" : "primary"}>
                     {marginPct.toFixed(0)}%
                   </Badge>
                 ) : (
-                  <span className="text-fg-subtle">Not set</span>
+                  <span className="text-fg-subtle">{t.common.notSet}</span>
                 )}
               </dd>
             </div>
             {quantityInStock !== undefined && (
               <div className="flex items-center justify-between border-t border-border pt-2">
-                <dt className="text-fg-muted">In stock</dt>
+                <dt className="text-fg-muted">{t.itemForm.inStock}</dt>
                 <dd className="font-semibold tabular-nums text-fg">{quantityInStock}</dd>
               </div>
             )}
           </dl>
           {quantityInStock !== undefined && (
-            <p className="text-xs text-fg-subtle">Stock changes through purchase invoices and sales.</p>
+            <p className="text-xs text-fg-subtle">{t.itemForm.stockHint}</p>
           )}
         </CardBody>
       </Card>
 
       <CardFooter className="lg:col-span-2">
         <Button variant="ghost" onClick={() => router.push("/admin/items")}>
-          Cancel
+          {t.common.cancel}
         </Button>
         <Button type="submit" loading={submitting}>
-          {itemId ? "Save changes" : "Add item"}
+          {itemId ? t.common.saveChanges : t.itemForm.add}
         </Button>
       </CardFooter>
     </form>

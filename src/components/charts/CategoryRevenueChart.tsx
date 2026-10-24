@@ -2,6 +2,7 @@
 
 import { ChartNoAxesColumn } from "lucide-react";
 import { EmptyState } from "@/components/ui";
+import { useI18n } from "@/i18n/I18nProvider";
 
 type Row = { category: string; revenue: number };
 
@@ -15,8 +16,9 @@ type Row = { category: string; revenue: number };
  * growing leftwards), which Recharts can't do for this layout.
  */
 export default function CategoryRevenueChart({ data }: { data: Row[] }) {
+  const { t } = useI18n();
   if (data.length === 0) {
-    return <EmptyState icon={ChartNoAxesColumn} title="No sales yet" description="Revenue by category shows up after the first sale." className="py-8" />;
+    return <EmptyState icon={ChartNoAxesColumn} title={t.dashboard.noSalesTitle} description={t.dashboard.noSalesDescription} className="py-8" />;
   }
 
   const sorted = [...data].sort((a, b) => b.revenue - a.revenue);

@@ -5,6 +5,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Plus, Pencil, Trash2, Tag, ArrowUpRight } from "lucide-react";
 import { Alert, Button, ConfirmDialog, Input } from "@/components/ui";
+import { useI18n } from "@/i18n/I18nProvider";
+import { fill } from "@/i18n/plural";
 
 type Category = { id: string; name: string; itemCount: number };
 
@@ -14,6 +16,7 @@ export default function CategoriesManager({
   initialCategories: Category[];
 }) {
   const router = useRouter();
+  const { t, n } = useI18n();
   const [categories, setCategories] = useState(initialCategories);
   const [adding, setAdding] = useState(false);
   const [newName, setNewName] = useState("");
@@ -41,7 +44,7 @@ export default function CategoriesManager({
     setSubmitting(false);
 
     if (!res.ok) {
-      setError(data.error ?? "Failed to add category");
+      setError(data.error ?? t.categories.addFailed);
       return;
     }
 
@@ -68,7 +71,7 @@ export default function CategoriesManager({
     const data = await res.json().catch(() => ({}));
 
     if (!res.ok) {
-      setError(data.error ?? "Failed to update category");
+      setError(data.error ?? t.categories.updateFailed);
       return;
     }
 
@@ -82,7 +85,7 @@ export default function CategoriesManager({
   async function handleDelete(id: string) {
     const res = await fetch(`/api/categories/${id}`, { method: "DELETE" });
     const data = await res.json().catch(() => ({}));
-    if (!res.ok) throw new Error(data.error ?? "Failed to delete category");
+    if (!res.ok) throw new Error(data.error ?? t.categories.deleteFailed);
 
     setCategories((prev) => prev.filter((c) => c.id !== id));
     router.refresh();
@@ -102,7 +105,7 @@ export default function CategoriesManager({
             {editingId === category.id ? (
               <form onSubmit={(e) => handleSaveEdit(e, category.id)} className="flex flex-1 flex-wrap items-center gap-2">
                 <Input
-                  aria-label="Category name"
+                  aria-label={t.categories.nameLabel}
                   className="min-w-48 flex-1 sm:max-w-sm"
                   value={editingName}
                   onChange={(e) => setEditingName(e.target.value)}
@@ -111,10 +114,10 @@ export default function CategoriesManager({
                   required
                 />
                 <Button type="submit" size="sm">
-                  Save
+                  {t.common.save}
                 </Button>
                 <Button variant="ghost" size="sm" onClick={() => setEditingId(null)}>
-                  Cancel
+                  {t.common.cancel}
                 </Button>
               </form>
             ) : (
@@ -125,8 +128,7 @@ export default function CategoriesManager({
                   href={`/admin/items?categoryId=${category.id}`}
                   className="inline-flex items-center gap-1 text-sm text-fg-muted hover:text-primary"
                 >
-                  <span className="tabular-nums">{category.itemCount}</span>
-                  item{category.itemCount === 1 ? "" : "s"}
+                  <span className="tabular-nums">{n(t.units, category.itemCount)}</span>
                   <ArrowUpRight className="size-3.5 rtl:-scale-x-100" aria-hidden />
                 </Link>
                 <div className="flex gap-0.5 opacity-100 transition-opacity sm:opacity-0 sm:group-focus-within:opacity-100 sm:group-hover:opacity-100">
@@ -135,8 +137,8 @@ export default function CategoriesManager({
                       size="sm"
                       iconOnly
                       icon={Pencil}
-                      aria-label={`Rename ${category.name}`}
-                      title="Rename"
+                      aria-label={fill(t.categories.renameNamed, { name: category.name })}
+                      title={t.common.rename}
                       onClick={() => startEdit(category)}
                     />
                     <Button
@@ -144,8 +146,8 @@ export default function CategoriesManager({
                       size="sm"
                       iconOnly
                       icon={Trash2}
-                      aria-label={`Delete ${category.name}`}
-                      title={category.itemCount > 0 ? "Move or delete its items first" : "Delete"}
+                      aria-label={fill(t.categories.deleteNamed, { name: category.name })}
+                      title={category.itemCount > 0 ? t.categories.hasItems : t.common.delete}
                       disabled={category.itemCount > 0}
                       onClick={() => setDeleting(category)}
                     />
@@ -159,9 +161,9 @@ export default function CategoriesManager({
           {adding ? (
             <form onSubmit={handleAdd} className="flex flex-wrap items-center gap-2">
               <Input
-                aria-label="New category name"
+                aria-label={t.categories.newNameLabel}
                 className="min-w-48 flex-1 sm:max-w-sm"
-                placeholder="Category name"
+                placeholder={t.categories.placeholder}
                 value={newName}
                 onChange={(e) => setNewName(e.target.value)}
                 onKeyDown={(e) => {
@@ -174,7 +176,7 @@ export default function CategoriesManager({
                 required
               />
               <Button type="submit" size="sm" loading={submitting}>
-                Add
+                {t.common.add}
               </Button>
               <Button
                 variant="ghost"
@@ -184,12 +186,12 @@ export default function CategoriesManager({
                   setNewName("");
                 }}
               >
-                Cancel
+                {t.common.cancel}
               </Button>
             </form>
           ) : (
             <Button variant="ghost" icon={Plus} onClick={() => setAdding(true)} className="-ms-3 text-primary">
-              Add category
+              {t.categories.add}
             </Button>
           )}
         </li>
@@ -199,9 +201,9 @@ export default function CategoriesManager({
         open={deleting !== null}
         onClose={() => setDeleting(null)}
         onConfirm={() => handleDelete(deleting!.id)}
-        title={`Delete “${deleting?.name ?? ""}”?`}
-        description="This can't be undone."
-        confirmLabel="Delete category"
+        title={fill(t.categories.deleteTitle, { name: deleting?.name ?? "" })}
+        description={t.categories.deleteDescription}
+        confirmLabel={t.categories.deleteConfirm}
       />
     </div>
   );
