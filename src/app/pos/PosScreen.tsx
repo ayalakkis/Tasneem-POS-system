@@ -9,9 +9,11 @@ import { useCustomerLookup } from "@/components/pos/useCustomerLookup";
 import CustomerFields from "@/components/pos/CustomerFields";
 import CheckoutPanel from "@/components/pos/CheckoutPanel";
 import { Alert, PageHeader } from "@/components/ui";
+import { useI18n } from "@/i18n/I18nProvider";
 
 export default function PosScreen() {
   const router = useRouter();
+  const { t } = useI18n();
   const {
     searchInputRef,
     query,
@@ -36,7 +38,7 @@ export default function PosScreen() {
     setError(null);
 
     if (cart.length === 0) {
-      setError("Add at least one item to the cart");
+      setError(t.pos.needItems);
       return;
     }
 
@@ -46,7 +48,7 @@ export default function PosScreen() {
 
       if (!customerId && phone.trim()) {
         if (!name.trim()) {
-          setError("Enter a name for the new customer");
+          setError(t.pos.needName);
           return;
         }
         const res = await fetch("/api/customers", {
@@ -56,7 +58,7 @@ export default function PosScreen() {
         });
         const data = await res.json();
         if (!res.ok) {
-          setError(data.error ?? "Failed to create customer");
+          setError(data.error ?? t.pos.customerFailed);
           return;
         }
         customerId = data.id;
@@ -72,7 +74,7 @@ export default function PosScreen() {
       });
       const data = await res.json();
       if (!res.ok) {
-        setError(data.error ?? "Failed to complete sale");
+        setError(data.error ?? t.pos.saleFailed);
         return;
       }
 
@@ -84,7 +86,7 @@ export default function PosScreen() {
 
   return (
     <div>
-      <PageHeader eyebrow="Point of sale" title="New sale" className="mb-6" />
+      <PageHeader eyebrow={t.nav.pointOfSale} title={t.pos.title} className="mb-6" />
 
       {(error || cartError) && (
         <Alert tone="danger" className="mb-6">
@@ -106,11 +108,11 @@ export default function PosScreen() {
         />
 
         <CheckoutPanel
-          title="Customer"
-          description="Optional. Leave blank for a guest sale."
+          title={t.pos.customer}
+          description={t.pos.customerDescription}
           lineCount={cart.reduce((sum, l) => sum + l.quantity, 0)}
           total={total}
-          actionLabel="Complete sale"
+          actionLabel={t.pos.complete}
           actionIcon={CircleCheck}
           onAction={handleCompleteSale}
           submitting={submitting}

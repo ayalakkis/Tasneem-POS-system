@@ -9,9 +9,11 @@ import { useCustomerLookup } from "@/components/pos/useCustomerLookup";
 import CustomerFields from "@/components/pos/CustomerFields";
 import CheckoutPanel from "@/components/pos/CheckoutPanel";
 import { Alert, Field, Textarea } from "@/components/ui";
+import { useI18n } from "@/i18n/I18nProvider";
 
 export default function DeliveryScreen() {
   const router = useRouter();
+  const { t } = useI18n();
   const {
     searchInputRef,
     query,
@@ -37,15 +39,15 @@ export default function DeliveryScreen() {
     setError(null);
 
     if (cart.length === 0) {
-      setError("Add at least one item to the order");
+      setError(t.deliveries.needItems);
       return;
     }
     if (!phone.trim() || !name.trim()) {
-      setError("Customer name and phone are required for delivery");
+      setError(t.deliveries.needCustomer);
       return;
     }
     if (!address.trim()) {
-      setError("Delivery address is required");
+      setError(t.deliveries.needAddress);
       return;
     }
 
@@ -61,7 +63,7 @@ export default function DeliveryScreen() {
         });
         const data = await res.json();
         if (!res.ok) {
-          setError(data.error ?? "Failed to create customer");
+          setError(data.error ?? t.pos.customerFailed);
           return;
         }
         customerId = data.id;
@@ -78,7 +80,7 @@ export default function DeliveryScreen() {
       });
       const data = await res.json();
       if (!res.ok) {
-        setError(data.error ?? "Failed to create delivery order");
+        setError(data.error ?? t.deliveries.createFailed);
         return;
       }
 
@@ -92,7 +94,7 @@ export default function DeliveryScreen() {
   return (
     <section aria-labelledby="new-delivery-title">
       <h2 id="new-delivery-title" className="mb-4 text-base font-semibold text-fg">
-        New delivery order
+        {t.deliveries.newOrder}
       </h2>
 
       {(error || cartError) && (
@@ -115,11 +117,11 @@ export default function DeliveryScreen() {
         />
 
         <CheckoutPanel
-          title="Delivery details"
-          description="Phone, name and address are required."
+          title={t.deliveries.detailsTitle}
+          description={t.deliveries.detailsDescription}
           lineCount={cart.reduce((sum, l) => sum + l.quantity, 0)}
           total={total}
-          actionLabel="Create delivery order"
+          actionLabel={t.deliveries.create}
           actionIcon={Truck}
           onAction={handleSubmit}
           submitting={submitting}
@@ -134,11 +136,11 @@ export default function DeliveryScreen() {
             matchedCustomer={matchedCustomer}
             lookupDone={lookupDone}
           />
-          <Field label="Address" htmlFor="delivery-address">
+          <Field label={t.deliveries.address} htmlFor="delivery-address">
             <Textarea
               id="delivery-address"
               rows={3}
-              placeholder="Building, street, area"
+              placeholder={t.deliveries.addressPlaceholder}
               value={address}
               onChange={(e) => setAddress(e.target.value)}
             />

@@ -5,7 +5,9 @@ import { useRouter } from "next/navigation";
 import { ArrowRight, ReceiptText, Truck, X } from "lucide-react";
 import type { DeliveryStatus } from "@prisma/client";
 import type { DeliveryListItem } from "@/lib/deliveries";
-import DeliveryStatusBadge, { DELIVERY_STATUS_LABELS } from "@/components/DeliveryStatusBadge";
+import DeliveryStatusBadge from "@/components/DeliveryStatusBadge";
+import { useI18n } from "@/i18n/I18nProvider";
+import { fill } from "@/i18n/plural";
 import {
   Alert,
   Button,
@@ -25,15 +27,9 @@ const NEXT_STATUS: Partial<Record<DeliveryStatus, DeliveryStatus>> = {
   OUT_FOR_DELIVERY: "DELIVERED",
 };
 
-const dateFormat = new Intl.DateTimeFormat("en-GB", {
-  day: "numeric",
-  month: "short",
-  hour: "2-digit",
-  minute: "2-digit",
-});
-
 export default function DeliveryTable({ deliveries }: { deliveries: DeliveryListItem[] }) {
   const router = useRouter();
+  const { t, f } = useI18n();
   const [error, setError] = useState<string | null>(null);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [cancelling, setCancelling] = useState<DeliveryListItem | null>(null);
@@ -45,7 +41,7 @@ export default function DeliveryTable({ deliveries }: { deliveries: DeliveryList
       body: JSON.stringify({ status }),
     });
     const data = await res.json().catch(() => ({}));
-    if (!res.ok) throw new Error(data.error ?? "Failed to update status");
+    if (!res.ok) throw new Error(data.error ?? t.deliveries.updateFailed);
     router.refresh();
   }
 
@@ -66,8 +62,8 @@ export default function DeliveryTable({ deliveries }: { deliveries: DeliveryList
       <div className="border-t border-border">
         <EmptyState
           icon={Truck}
-          title="No delivery orders yet"
-          description="Sales marked for delivery at the POS will appear here."
+          title={t.deliveries.emptyTitle}
+          description={t.deliveries.emptyDescription}
         />
       </div>
     );
@@ -84,14 +80,14 @@ export default function DeliveryTable({ deliveries }: { deliveries: DeliveryList
       <Table>
         <THead>
           <TR>
-            <TH>Date</TH>
-            <TH>Customer</TH>
-            <TH>Address</TH>
-            <TH numeric>Items</TH>
-            <TH numeric>Total</TH>
-            <TH>Status</TH>
+            <TH>{t.deliveries.colDate}</TH>
+            <TH>{t.deliveries.colCustomer}</TH>
+            <TH>{t.deliveries.colAddress}</TH>
+            <TH numeric>{t.deliveries.colItems}</TH>
+            <TH numeric>{t.deliveries.colTotal}</TH>
+            <TH>{t.deliveries.colStatus}</TH>
             <TH>
-              <span className="sr-only">Actions</span>
+              <span className="sr-only">{t.common.actions}</span>
             </TH>
           </TR>
         </THead>
@@ -103,9 +99,9 @@ export default function DeliveryTable({ deliveries }: { deliveries: DeliveryList
             const units = d.items.reduce((sum, i) => sum + i.quantity, 0);
             return (
               <TR key={d.id}>
-                <TD className="whitespace-nowrap tabular-nums">{dateFormat.format(d.date)}</TD>
+                <TD className="whitespace-nowrap tabular-nums">{f.shortDateTime(d.date)}</TD>
                 <TD>
-                  <p className="font-medium text-fg">{d.customer?.name ?? "Guest"}</p>
+                  <p className="font-medium text-fg">{d.customer?.name ?? t.common.guest}</p>
                   {d.customer?.phone && <p className="text-xs tabular-nums text-fg-subtle">{d.customer.phone}</p>}
                 </TD>
                 <TD className="max-w-[16rem] truncate" title={d.deliveryAddress ?? undefined}>
@@ -113,7 +109,7 @@ export default function DeliveryTable({ deliveries }: { deliveries: DeliveryList
                 </TD>
                 <TD numeric>{units}</TD>
                 <TD numeric className="font-medium text-fg">
-                  {d.totalAmount.toFixed(2)}
+                  {f.money(d.totalAmount)}
                 </TD>
                 <TD>
                   <DeliveryStatusBadge status={status} />
@@ -128,7 +124,7 @@ export default function DeliveryTable({ deliveries }: { deliveries: DeliveryList
                         loading={busy}
                         onClick={() => advance(d.id, next)}
                       >
-                        {DELIVERY_STATUS_LABELS[next]}
+                        {t.deliveryStatus[next]}
                       </Button>
                     )}
                     <LinkButton
@@ -137,8 +133,8 @@ export default function DeliveryTable({ deliveries }: { deliveries: DeliveryList
                       size="sm"
                       iconOnly
                       icon={ReceiptText}
-                      aria-label="View invoice"
-                      title="View invoice"
+                      aria-label={t.deliveries.viewInvoice}
+                      title={t.deliveries.viewInvoice}
                     />
                     {status !== "CANCELLED" && status !== "DELIVERED" && (
                       <Button
@@ -146,8 +142,8 @@ export default function DeliveryTable({ deliveries }: { deliveries: DeliveryList
                         size="sm"
                         iconOnly
                         icon={X}
-                        aria-label="Cancel delivery"
-                        title="Cancel delivery"
+                        aria-label={t.deliveries.cancel}
+                        title={t.deliveries.cancel}
                         disabled={busy}
                         onClick={() => setCancelling(d)}
                       />
@@ -164,13 +160,16 @@ export default function DeliveryTable({ deliveries }: { deliveries: DeliveryList
         open={cancelling !== null}
         onClose={() => setCancelling(null)}
         onConfirm={() => requestStatus(cancelling!.id, "CANCELLED")}
-        title="Cancel this delivery?"
+        title={t.deliveries.cancelTitle}
         description={
           cancelling
-            ? `Order for ${cancelling.customer?.name ?? "this customer"} (${cancelling.totalAmount.toFixed(2)}). This can't be undone.`
+            ? fill(t.deliveries.cancelDescription, {
+                name: cancelling.customer?.name ?? t.deliveries.thisCustomer,
+                total: f.money(cancelling.totalAmount),
+              })
             : undefined
         }
-        confirmLabel="Cancel delivery"
+        confirmLabel={t.deliveries.cancel}
       />
     </div>
   );

@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { requirePageUser } from "@/lib/auth";
 import { SHOP_NAME } from "@/lib/config";
 import { LogoMark } from "@/components/brand/Logo";
-import { DELIVERY_STATUS_LABELS } from "@/components/DeliveryStatusBadge";
+import { getI18n } from "@/i18n/server";
 import InvoiceToolbar from "./InvoiceToolbar";
 
 // The receipt is a printed document, so the "paper" uses fixed light brand
@@ -42,7 +42,7 @@ export default async function InvoicePage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  await requirePageUser();
+  const [, { t }] = await Promise.all([requirePageUser(), getI18n()]);
   const { id } = await params;
 
   const invoice = await prisma.salesInvoice.findUnique({
@@ -114,7 +114,7 @@ export default async function InvoicePage({
                 <p className="font-medium">{invoice.deliveryAddress}</p>
               </div>
               <span className={`shrink-0 rounded-full px-2.5 py-0.5 text-xs font-medium ${STATUS_PILL[status]}`}>
-                {DELIVERY_STATUS_LABELS[status]}
+                {t.deliveryStatus[status]}
               </span>
             </div>
           )}

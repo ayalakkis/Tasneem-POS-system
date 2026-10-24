@@ -2,6 +2,7 @@
 
 import { Phone, UserRound } from "lucide-react";
 import { Badge, Field, Input } from "@/components/ui";
+import { useI18n } from "@/i18n/I18nProvider";
 import type { Customer } from "./useCustomerLookup";
 
 /** Phone-first customer lookup: an exact phone match fills and locks the name. */
@@ -24,9 +25,10 @@ export default function CustomerFields({
   phoneHint?: string;
   idPrefix: string;
 }) {
+  const { t } = useI18n();
   return (
     <>
-      <Field label="Phone" htmlFor={`${idPrefix}-phone`} hint={phoneHint}>
+      <Field label={t.pos.phone} htmlFor={`${idPrefix}-phone`} hint={phoneHint}>
         <Input
           id={`${idPrefix}-phone`}
           icon={Phone}
@@ -42,20 +44,20 @@ export default function CustomerFields({
         <Field
           label={
             <span className="flex w-full items-center justify-between">
-              Name
+              {t.pos.name}
               {matchedCustomer ? (
                 <Badge tone="primary" dot>
-                  Existing customer
+                  {t.pos.existing}
                 </Badge>
               ) : (
                 <Badge tone="info" dot>
-                  New customer
+                  {t.pos.newCustomer}
                 </Badge>
               )}
             </span>
           }
           htmlFor={`${idPrefix}-name`}
-          hint={matchedCustomer ? undefined : "They'll be saved when the order completes."}
+          hint={matchedCustomer ? undefined : t.pos.newCustomerHint}
         >
           <Input
             id={`${idPrefix}-name`}

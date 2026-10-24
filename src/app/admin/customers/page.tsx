@@ -3,8 +3,10 @@ import { Users, Receipt, Repeat, ChevronRight } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import StatCard from "@/components/layout/StatCard";
 import { Badge, EmptyState, PageHeader, Table, TBody, TD, TH, THead, TR } from "@/components/ui";
+import { getI18n } from "@/i18n/server";
 
 export default async function CustomersPage() {
+  const { t } = await getI18n();
   const customers = await prisma.customer.findMany({
     orderBy: { name: "asc" },
     include: { _count: { select: { salesInvoices: true } } },
@@ -16,20 +18,20 @@ export default async function CustomersPage() {
   return (
     <div>
       <PageHeader
-        eyebrow="People & orders"
-        title="Customers"
-        description="Customers are added from the POS screen during checkout."
+        eyebrow={t.nav.peopleOrders}
+        title={t.customers.title}
+        description={t.customers.description}
       />
 
       <div className="grid grid-cols-2 gap-x-6 gap-y-8 lg:grid-cols-3">
-        <StatCard label="Total customers" value={customers.length} icon={Users} />
-        <StatCard label="Total invoices" value={totalInvoices} icon={Receipt} tone="info" />
+        <StatCard label={t.customers.total} value={customers.length} icon={Users} />
+        <StatCard label={t.customers.invoices} value={totalInvoices} icon={Receipt} tone="info" />
         <StatCard
-          label="Returning customers"
+          label={t.customers.returning}
           value={returningCustomers}
           icon={Repeat}
           tone="accent"
-          hint="More than one invoice"
+          hint={t.customers.returningHint}
         />
       </div>
 
@@ -38,19 +40,19 @@ export default async function CustomersPage() {
           <div className="border-t border-border">
             <EmptyState
               icon={Users}
-              title="No customers yet"
-              description="Enter a phone number at checkout to save a customer."
+              title={t.customers.emptyTitle}
+              description={t.customers.emptyDescription}
             />
           </div>
         ) : (
           <Table>
             <THead>
               <TR>
-                <TH>Name</TH>
-                <TH>Phone</TH>
-                <TH numeric>Invoices</TH>
+                <TH>{t.customers.colName}</TH>
+                <TH>{t.customers.colPhone}</TH>
+                <TH numeric>{t.customers.colInvoices}</TH>
                 <TH>
-                  <span className="sr-only">Open</span>
+                  <span className="sr-only">{t.customers.open}</span>
                 </TH>
               </TR>
             </THead>

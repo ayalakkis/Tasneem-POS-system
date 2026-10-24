@@ -16,6 +16,8 @@ import {
   Input,
   cn,
 } from "@/components/ui";
+import { useI18n } from "@/i18n/I18nProvider";
+import { fill } from "@/i18n/plural";
 
 type UserRow = { id: string; name: string | null; username: string; role: Role };
 
@@ -27,6 +29,7 @@ export default function UsersManager({
   currentUserId: string;
 }) {
   const router = useRouter();
+  const { t, n } = useI18n();
   const [users, setUsers] = useState(initialUsers);
   const [error, setError] = useState<string | null>(null);
 
@@ -56,7 +59,7 @@ export default function UsersManager({
       const data = await res.json().catch(() => ({}));
 
       if (!res.ok) {
-        setError(data.error ?? "Failed to create employee");
+        setError(data.error ?? t.users.createFailed);
         return;
       }
 
@@ -66,7 +69,7 @@ export default function UsersManager({
       setUsers((prev) => [...prev, data]);
       router.refresh();
     } catch {
-      setError("Failed to create employee. Check your connection and try again.");
+      setError(t.users.createConnection);
     } finally {
       setSubmitting(false);
     }
@@ -98,7 +101,7 @@ export default function UsersManager({
       const data = await res.json().catch(() => ({}));
 
       if (!res.ok) {
-        setError(data.error ?? "Failed to update user");
+        setError(data.error ?? t.users.updateFailed);
         return;
       }
 
@@ -106,7 +109,7 @@ export default function UsersManager({
       setEditingId(null);
       router.refresh();
     } catch {
-      setError("Failed to update user. Check your connection and try again.");
+      setError(t.users.updateConnection);
     } finally {
       setSavingEdit(false);
     }
@@ -117,10 +120,10 @@ export default function UsersManager({
     try {
       res = await fetch(`/api/users/${id}`, { method: "DELETE" });
     } catch {
-      throw new Error("Failed to delete user. Check your connection and try again.");
+      throw new Error(t.users.deleteConnection);
     }
     const data = await res.json().catch(() => ({}));
-    if (!res.ok) throw new Error(data.error ?? "Failed to delete user");
+    if (!res.ok) throw new Error(data.error ?? t.users.deleteFailed);
 
     setUsers((prev) => prev.filter((u) => u.id !== id));
     router.refresh();
@@ -129,13 +132,13 @@ export default function UsersManager({
   return (
     <div className="grid gap-x-12 gap-y-10 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] lg:items-start">
       <Card>
-        <CardHeader title="New employee" description="Employees can use the POS only. They never see cost or profit." />
+        <CardHeader title={t.users.newTitle} description={t.users.newDescription} />
         <CardBody>
           <form onSubmit={handleCreate} className="space-y-4" autoComplete="off">
-            <Field label="Full name" htmlFor="new-name">
+            <Field label={t.users.fullName} htmlFor="new-name">
               <Input id="new-name" value={name} onChange={(e) => setName(e.target.value)} required />
             </Field>
-            <Field label="Username" htmlFor="new-username" hint="Used to sign in.">
+            <Field label={t.users.username} htmlFor="new-username" hint={t.users.usernameHint}>
               <Input
                 id="new-username"
                 value={username}
@@ -145,7 +148,7 @@ export default function UsersManager({
                 required
               />
             </Field>
-            <Field label="Temporary password" htmlFor="new-password" hint="At least 6 characters. Share it with the employee.">
+            <Field label={t.users.tempPassword} htmlFor="new-password" hint={t.users.tempPasswordHint}>
               <Input
                 id="new-password"
                 type="text"
@@ -158,7 +161,7 @@ export default function UsersManager({
               />
             </Field>
             <Button type="submit" icon={UserPlus} loading={submitting} className="w-full">
-              Create employee
+              {t.users.create}
             </Button>
           </form>
         </CardBody>
@@ -168,7 +171,7 @@ export default function UsersManager({
         {error && <Alert tone="danger">{error}</Alert>}
 
         <Card>
-          <CardHeader title="Team" description={`${users.length} account${users.length === 1 ? "" : "s"}`} />
+          <CardHeader title={t.users.team} description={n(t.users.accounts, users.length)} />
           <ul className="divide-y divide-border">
             {users.map((u) => {
               const isAdmin = u.role === "ADMIN";
@@ -179,7 +182,7 @@ export default function UsersManager({
                   <li key={u.id} className="-mx-3 rounded-lg bg-surface-2 px-3 py-4">
                     <form onSubmit={(e) => handleSaveEdit(e, u.id)} className="space-y-3">
                       <div className="grid gap-3 sm:grid-cols-2">
-                        <Field label="Full name" htmlFor={`edit-name-${u.id}`}>
+                        <Field label={t.users.fullName} htmlFor={`edit-name-${u.id}`}>
                           <Input
                             id={`edit-name-${u.id}`}
                             size="sm"
@@ -189,7 +192,7 @@ export default function UsersManager({
                             autoFocus
                           />
                         </Field>
-                        <Field label="Username" htmlFor={`edit-username-${u.id}`}>
+                        <Field label={t.users.username} htmlFor={`edit-username-${u.id}`}>
                           <Input
                             id={`edit-username-${u.id}`}
                             size="sm"
@@ -199,7 +202,12 @@ export default function UsersManager({
                           />
                         </Field>
                       </div>
-                      <Field label="New password" htmlFor={`edit-password-${u.id}`} optional="Optional" hint="Leave blank to keep the current one.">
+                      <Field
+                        label={t.users.newPassword}
+                        htmlFor={`edit-password-${u.id}`}
+                        optional={t.common.optional}
+                        hint={t.users.newPasswordHint}
+                      >
                         <Input
                           id={`edit-password-${u.id}`}
                           size="sm"
@@ -212,10 +220,10 @@ export default function UsersManager({
                       </Field>
                       <div className="flex justify-end gap-2">
                         <Button variant="ghost" size="sm" onClick={() => setEditingId(null)}>
-                          Cancel
+                          {t.common.cancel}
                         </Button>
                         <Button type="submit" size="sm" loading={savingEdit}>
-                          Save changes
+                          {t.common.saveChanges}
                         </Button>
                       </div>
                     </form>
@@ -240,19 +248,22 @@ export default function UsersManager({
                   <div className="min-w-0 flex-1">
                     <p className="flex items-center gap-2 truncate text-sm font-medium text-fg">
                       {u.name || u.username}
-                      {isSelf && <Badge tone="neutral">You</Badge>}
+                      {isSelf && <Badge tone="neutral">{t.users.you}</Badge>}
                     </p>
-                    <p className="truncate text-xs text-fg-subtle">@{u.username}</p>
+                    {/* dir="ltr" keeps "@" in front of the handle inside Arabic text. */}
+                    <p className="truncate text-xs text-fg-subtle">
+                      <span dir="ltr">@{u.username}</span>
+                    </p>
                   </div>
-                  <Badge tone={isAdmin ? "accent" : "primary"}>{isAdmin ? "Admin" : "Employee"}</Badge>
+                  <Badge tone={isAdmin ? "accent" : "primary"}>{isAdmin ? t.users.admin : t.users.employee}</Badge>
                   <div className="flex items-center gap-0.5">
                     <Button
                       variant="ghost"
                       size="sm"
                       iconOnly
                       icon={Pencil}
-                      aria-label={`Edit ${u.name || u.username}`}
-                      title="Edit"
+                      aria-label={fill(t.users.editNamed, { name: u.name || u.username })}
+                      title={t.common.edit}
                       onClick={() => startEdit(u)}
                     />
                     <Button
@@ -260,8 +271,8 @@ export default function UsersManager({
                       size="sm"
                       iconOnly
                       icon={Trash2}
-                      aria-label={`Delete ${u.name || u.username}`}
-                      title={isSelf ? "You can't delete your own account" : "Delete"}
+                      aria-label={fill(t.users.deleteNamed, { name: u.name || u.username })}
+                      title={isSelf ? t.users.cantDeleteSelf : t.common.delete}
                       disabled={isSelf}
                       onClick={() => setDeleting(u)}
                     />
@@ -277,9 +288,9 @@ export default function UsersManager({
         open={deleting !== null}
         onClose={() => setDeleting(null)}
         onConfirm={() => handleDelete(deleting!.id)}
-        title={`Delete ${deleting?.name || deleting?.username || "user"}?`}
-        description="They will no longer be able to sign in. This can't be undone."
-        confirmLabel="Delete user"
+        title={fill(t.users.deleteTitle, { name: deleting?.name || deleting?.username || t.users.fallbackName })}
+        description={t.users.deleteDescription}
+        confirmLabel={t.users.deleteConfirm}
       />
     </div>
   );

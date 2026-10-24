@@ -3,6 +3,8 @@
 import { useState, type RefObject, type KeyboardEvent } from "react";
 import { Minus, Plus, ScanBarcode, Search, Trash2 } from "lucide-react";
 import { Badge, Button, EmptyState, cn } from "@/components/ui";
+import { useI18n } from "@/i18n/I18nProvider";
+import { fill } from "@/i18n/plural";
 import type { SearchItem, CartLine } from "./useItemCart";
 
 export default function ItemSearchAndCart({
@@ -29,6 +31,7 @@ export default function ItemSearchAndCart({
   // Keyboard highlight in the results list. -1 = nothing highlighted, so Enter
   // falls through to the hook's barcode / single-match behavior.
   const [active, setActive] = useState(-1);
+  const { t, f, n } = useI18n();
   const open = query.length > 0;
 
   function handleKeyDown(e: KeyboardEvent<HTMLInputElement>) {
@@ -78,9 +81,9 @@ export default function ItemSearchAndCart({
           aria-expanded={open && results.length > 0}
           aria-controls="pos-search-results"
           aria-activedescendant={active >= 0 ? `pos-result-${active}` : undefined}
-          aria-label="Scan barcode or search items"
+          aria-label={t.pos.searchLabel}
           className="h-14 w-full rounded-xl border border-border-strong bg-surface ps-12 pe-28 text-base text-fg shadow-sm transition-[border-color,box-shadow] placeholder:text-fg-subtle focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/15"
-          placeholder="Scan a barcode or type a name"
+          placeholder={t.pos.searchPlaceholder}
           value={query}
           onChange={(e) => {
             setActive(-1);
@@ -91,7 +94,7 @@ export default function ItemSearchAndCart({
           autoFocus
         />
         <kbd className="pointer-events-none absolute font-sans end-4 top-1/2 hidden -translate-y-1/2 items-center gap-1 rounded-md border border-border bg-surface-2 px-2 py-0.5 text-[11px] font-medium text-fg-subtle sm:flex">
-          Enter ↵ to add
+          {t.pos.enterHint}
         </kbd>
 
         {open && results.length > 0 && (
@@ -125,12 +128,12 @@ export default function ItemSearchAndCart({
                       </span>
                     </span>
                     {out ? (
-                      <Badge tone="danger">Out of stock</Badge>
+                      <Badge tone="danger">{t.pos.outOfStock}</Badge>
                     ) : (
-                      <span className="text-xs tabular-nums text-fg-subtle">{item.quantityInStock} left</span>
+                      <span className="text-xs tabular-nums text-fg-subtle">{fill(t.pos.left, { count: item.quantityInStock })}</span>
                     )}
                     <span className="w-16 text-end font-semibold tabular-nums text-fg">
-                      {item.sellingPrice.toFixed(2)}
+                      {f.money(item.sellingPrice)}
                     </span>
                   </button>
                 </li>
@@ -139,16 +142,16 @@ export default function ItemSearchAndCart({
           </ul>
         )}
         {open && results.length === 0 && (
-          <p className="mt-2 px-1 text-sm text-fg-subtle">No matching items.</p>
+          <p className="mt-2 px-1 text-sm text-fg-subtle">{t.pos.noMatch}</p>
         )}
       </div>
 
       <section aria-label="Cart" className="pt-2">
         <div className="flex items-center justify-between border-b border-border-strong pb-3">
-          <h2 className="text-sm font-semibold text-fg">Cart</h2>
+          <h2 className="text-sm font-semibold text-fg">{t.pos.cart}</h2>
           {cart.length > 0 && (
             <span className="text-xs tabular-nums text-fg-muted">
-              {units} unit{units === 1 ? "" : "s"} in {cart.length} line{cart.length === 1 ? "" : "s"}
+              {fill(t.pos.cartSummary, { units: n(t.pos.unitCount, units), lines: n(t.pos.lineCount, cart.length) })}
             </span>
           )}
         </div>
@@ -156,8 +159,8 @@ export default function ItemSearchAndCart({
         {cart.length === 0 ? (
           <EmptyState
             icon={ScanBarcode}
-            title="Cart is empty"
-            description="Scan a barcode or search above to add the first item."
+            title={t.pos.emptyTitle}
+            description={t.pos.emptyDescription}
             className="py-12"
           />
         ) : (
@@ -166,13 +169,13 @@ export default function ItemSearchAndCart({
               <li key={line.itemId} className="flex flex-wrap items-center gap-x-4 gap-y-2 py-3">
                 <div className="min-w-0 flex-1 basis-40">
                   <p className="truncate font-medium text-fg">{line.name}</p>
-                  <p className="text-xs tabular-nums text-fg-subtle">{line.sellingPrice.toFixed(2)} each</p>
+                  <p className="text-xs tabular-nums text-fg-subtle">{fill(t.pos.each, { price: f.money(line.sellingPrice) })}</p>
                 </div>
 
                 <div className="flex items-center rounded-lg border border-border-strong bg-surface shadow-sm">
                   <button
                     type="button"
-                    aria-label={`Decrease ${line.name}`}
+                    aria-label={fill(t.pos.decrease, { name: line.name })}
                     onClick={() => onUpdateQuantity(line.itemId, line.quantity - 1)}
                     disabled={line.quantity <= 1}
                     className="flex size-10 items-center justify-center rounded-s-lg text-fg-muted hover:bg-surface-2 hover:text-fg disabled:opacity-40"
@@ -181,7 +184,7 @@ export default function ItemSearchAndCart({
                   </button>
                   <input
                     type="number"
-                    aria-label={`Quantity of ${line.name}`}
+                    aria-label={fill(t.pos.quantityOf, { name: line.name })}
                     min={1}
                     max={line.quantityInStock}
                     value={line.quantity}
@@ -190,10 +193,10 @@ export default function ItemSearchAndCart({
                   />
                   <button
                     type="button"
-                    aria-label={`Increase ${line.name}`}
+                    aria-label={fill(t.pos.increase, { name: line.name })}
                     onClick={() => onUpdateQuantity(line.itemId, line.quantity + 1)}
                     disabled={line.quantity >= line.quantityInStock}
-                    title={line.quantity >= line.quantityInStock ? "No more in stock" : undefined}
+                    title={line.quantity >= line.quantityInStock ? t.pos.noMore : undefined}
                     className="flex size-10 items-center justify-center rounded-e-lg text-fg-muted hover:bg-surface-2 hover:text-fg disabled:opacity-40"
                   >
                     <Plus className="size-4" />
@@ -201,15 +204,15 @@ export default function ItemSearchAndCart({
                 </div>
 
                 <p className="w-20 text-end font-semibold tabular-nums text-fg">
-                  {(line.sellingPrice * line.quantity).toFixed(2)}
+                  {f.money(line.sellingPrice * line.quantity)}
                 </p>
 
                 <Button
                   variant="danger-ghost"
                   iconOnly
                   icon={Trash2}
-                  aria-label={`Remove ${line.name}`}
-                  title="Remove"
+                  aria-label={fill(t.pos.removeNamed, { name: line.name })}
+                  title={t.pos.remove}
                   onClick={() => onRemoveLine(line.itemId)}
                 />
               </li>

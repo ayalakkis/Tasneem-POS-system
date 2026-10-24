@@ -1,15 +1,11 @@
+"use client";
+
 import type { DeliveryStatus } from "@prisma/client";
 import { Badge, type BadgeTone } from "@/components/ui";
-
-export const DELIVERY_STATUS_LABELS: Record<DeliveryStatus, string> = {
-  PENDING: "Pending",
-  OUT_FOR_DELIVERY: "Out for delivery",
-  DELIVERED: "Delivered",
-  CANCELLED: "Cancelled",
-};
+import { useI18n } from "@/i18n/I18nProvider";
 
 // Same meaning as the dashboard status chart: brass waiting, blue moving,
-// green done, clay stopped.
+// green done, clay stopped. Labels live in the dictionaries (t.deliveryStatus).
 const TONES: Record<DeliveryStatus, BadgeTone> = {
   PENDING: "accent",
   OUT_FOR_DELIVERY: "info",
@@ -18,9 +14,10 @@ const TONES: Record<DeliveryStatus, BadgeTone> = {
 };
 
 export default function DeliveryStatusBadge({ status }: { status: DeliveryStatus }) {
+  const { t } = useI18n();
   return (
     <Badge tone={TONES[status]} dot>
-      {DELIVERY_STATUS_LABELS[status]}
+      {t.deliveryStatus[status]}
     </Badge>
   );
 }
