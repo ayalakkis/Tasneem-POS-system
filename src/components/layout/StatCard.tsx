@@ -32,7 +32,7 @@ export default function StatCard({
   hero?: boolean;
 }) {
   return (
-    <div className={cn("min-w-0 border-l-2 py-1 pl-4", hero ? "border-primary" : "border-border")}>
+    <div className={cn("min-w-0 border-s-2 py-1 ps-4", hero ? "border-primary" : "border-border")}>
       <p className="flex items-center gap-1.5 text-[13px] font-medium text-fg-muted">
         <Icon className={cn("size-3.5 shrink-0", ICON_TONES[hero ? "primary" : tone])} strokeWidth={2} aria-hidden />
         <span className="truncate">{label}</span>

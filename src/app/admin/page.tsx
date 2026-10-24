@@ -54,7 +54,7 @@ export default async function AdminDashboardPage() {
             title="Profit, last 30 days"
             description="Daily profit across all sales."
             actions={
-              <div className="text-right">
+              <div className="text-end">
                 <p className="text-xs text-fg-subtle">Total</p>
                 <p className="text-sm font-semibold tabular-nums text-fg">{trendTotal.toFixed(2)}</p>
               </div>

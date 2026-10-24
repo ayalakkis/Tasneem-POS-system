@@ -82,8 +82,8 @@ export default async function CustomersPage() {
                       c._count.salesInvoices
                     )}
                   </TD>
-                  <TD className="w-px text-right">
-                    <ChevronRight className="ml-auto size-4 text-fg-subtle" aria-hidden />
+                  <TD className="w-px text-end">
+                    <ChevronRight className="ms-auto size-4 text-fg-subtle rtl:-scale-x-100" aria-hidden />
                   </TD>
                 </TR>
               ))}

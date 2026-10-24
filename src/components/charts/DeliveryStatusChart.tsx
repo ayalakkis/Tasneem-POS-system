@@ -23,9 +23,9 @@ export default function DeliveryStatusChart({ counts }: { counts: DeliveryCounts
 
   return (
     <div>
-      <p className="text-[28px] font-semibold leading-none tracking-tight tabular-nums text-fg">
+      <p className="flex items-baseline gap-2 text-[28px] font-semibold leading-none tracking-tight tabular-nums text-fg">
         {total}
-        <span className="ml-2 text-sm font-normal tracking-normal text-fg-muted">orders</span>
+        <span className="text-sm font-normal tracking-normal text-fg-muted">orders</span>
       </p>
 
       {/* gap-0.5 is the 2px surface spacer between segments */}
@@ -38,7 +38,7 @@ export default function DeliveryStatusChart({ counts }: { counts: DeliveryCounts
           STATUSES.filter((s) => counts[s.key] > 0).map((s) => (
             <div
               key={s.key}
-              className={cn("h-full first:rounded-l-full last:rounded-r-full", s.bar)}
+              className={cn("h-full first:rounded-s-full last:rounded-e-full", s.bar)}
               style={{ width: `${(counts[s.key] / total) * 100}%` }}
               title={`${s.label}: ${counts[s.key]}`}
             />
@@ -52,8 +52,8 @@ export default function DeliveryStatusChart({ counts }: { counts: DeliveryCounts
             <li key={s.key} className="flex items-center gap-3 rounded-lg px-2 py-2 -mx-2 hover:bg-surface-2">
               <s.icon className={cn("size-4 shrink-0", s.text)} strokeWidth={1.75} aria-hidden />
               <span className="flex-1 text-sm text-fg-muted">{s.label}</span>
-              <span className="w-10 text-right text-xs tabular-nums text-fg-subtle">{share}%</span>
-              <span className="w-8 text-right text-sm font-semibold tabular-nums text-fg">{counts[s.key]}</span>
+              <span className="w-10 text-end text-xs tabular-nums text-fg-subtle">{share}%</span>
+              <span className="w-8 text-end text-sm font-semibold tabular-nums text-fg">{counts[s.key]}</span>
             </li>
           );
         })}

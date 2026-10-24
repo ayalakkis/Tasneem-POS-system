@@ -70,7 +70,7 @@ export function ConfirmDialog({
       onClick={(e) => e.target === ref.current && close()}
       // Reset inherited text styles: the dialog is often rendered inside a
       // right-aligned, nowrap table cell.
-      className="m-auto w-[calc(100%-2rem)] max-w-md whitespace-normal text-left rounded-2xl border border-border bg-surface p-0 text-fg shadow-lg backdrop:bg-black/45 backdrop:backdrop-blur-[2px] open:animate-[dialog-in_160ms_ease-out]"
+      className="m-auto w-[calc(100%-2rem)] max-w-md whitespace-normal text-start rounded-2xl border border-border bg-surface p-0 text-fg shadow-lg backdrop:bg-black/45 backdrop:backdrop-blur-[2px] open:animate-[dialog-in_160ms_ease-out]"
     >
       <div className="flex gap-4 p-6">
         {tone === "danger" && (

@@ -203,7 +203,7 @@ export default function PurchaseForm({
             </Field>
 
             <div className="col-span-2 flex items-end sm:col-span-3">
-              <Button type="submit" icon={PackagePlus} loading={submitting} className="w-full sm:ml-auto sm:w-auto">
+              <Button type="submit" icon={PackagePlus} loading={submitting} className="w-full sm:ms-auto sm:w-auto">
                 Record purchase
               </Button>
             </div>

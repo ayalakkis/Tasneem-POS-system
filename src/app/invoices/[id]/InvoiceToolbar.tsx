@@ -12,7 +12,7 @@ export default function InvoiceToolbar() {
       <Button variant="ghost" icon={ArrowLeft} onClick={() => router.back()}>
         Back
       </Button>
-      <LinkButton href="/pos" variant="secondary" icon={ShoppingBag} className="ml-auto">
+      <LinkButton href="/pos" variant="secondary" icon={ShoppingBag} className="ms-auto">
         New sale
       </LinkButton>
       <Button icon={Printer} onClick={() => window.print()}>

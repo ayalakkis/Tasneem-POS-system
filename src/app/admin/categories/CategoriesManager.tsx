@@ -127,7 +127,7 @@ export default function CategoriesManager({
                 >
                   <span className="tabular-nums">{category.itemCount}</span>
                   item{category.itemCount === 1 ? "" : "s"}
-                  <ArrowUpRight className="size-3.5" aria-hidden />
+                  <ArrowUpRight className="size-3.5 rtl:-scale-x-100" aria-hidden />
                 </Link>
                 <div className="flex gap-0.5 opacity-100 transition-opacity sm:opacity-0 sm:group-focus-within:opacity-100 sm:group-hover:opacity-100">
                     <Button
@@ -188,7 +188,7 @@ export default function CategoriesManager({
               </Button>
             </form>
           ) : (
-            <Button variant="ghost" icon={Plus} onClick={() => setAdding(true)} className="-ml-3 text-primary">
+            <Button variant="ghost" icon={Plus} onClick={() => setAdding(true)} className="-ms-3 text-primary">
               Add category
             </Button>
           )}

@@ -70,7 +70,7 @@ export default function ItemSearchAndCart({
       <div className="relative">
         <Search
           aria-hidden
-          className="pointer-events-none absolute left-4 top-1/2 size-5 -translate-y-1/2 text-fg-subtle"
+          className="pointer-events-none absolute start-4 top-1/2 size-5 -translate-y-1/2 text-fg-subtle"
         />
         <input
           ref={searchInputRef}
@@ -79,7 +79,7 @@ export default function ItemSearchAndCart({
           aria-controls="pos-search-results"
           aria-activedescendant={active >= 0 ? `pos-result-${active}` : undefined}
           aria-label="Scan barcode or search items"
-          className="h-14 w-full rounded-xl border border-border-strong bg-surface pl-12 pr-28 text-base text-fg shadow-sm transition-[border-color,box-shadow] placeholder:text-fg-subtle focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/15"
+          className="h-14 w-full rounded-xl border border-border-strong bg-surface ps-12 pe-28 text-base text-fg shadow-sm transition-[border-color,box-shadow] placeholder:text-fg-subtle focus:border-primary focus:outline-none focus:ring-4 focus:ring-primary/15"
           placeholder="Scan a barcode or type a name"
           value={query}
           onChange={(e) => {
@@ -90,7 +90,7 @@ export default function ItemSearchAndCart({
           autoComplete="off"
           autoFocus
         />
-        <kbd className="pointer-events-none absolute font-sans right-4 top-1/2 hidden -translate-y-1/2 items-center gap-1 rounded-md border border-border bg-surface-2 px-2 py-0.5 text-[11px] font-medium text-fg-subtle sm:flex">
+        <kbd className="pointer-events-none absolute font-sans end-4 top-1/2 hidden -translate-y-1/2 items-center gap-1 rounded-md border border-border bg-surface-2 px-2 py-0.5 text-[11px] font-medium text-fg-subtle sm:flex">
           Enter ↵ to add
         </kbd>
 
@@ -111,15 +111,17 @@ export default function ItemSearchAndCart({
                     onClick={() => select(item)}
                     disabled={out}
                     className={cn(
-                      "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm disabled:cursor-not-allowed disabled:opacity-55",
+                      "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-start text-sm disabled:cursor-not-allowed disabled:opacity-55",
                       active === i && !out && "bg-primary-soft",
                     )}
                   >
                     <span className="min-w-0 flex-1">
                       <span className="block truncate font-medium text-fg">{item.name}</span>
-                      <span className="block truncate text-xs text-fg-subtle">
-                        {item.category.name}
-                        {item.barcode && <span className="ml-3 tabular-nums">{item.barcode}</span>}
+                      {/* Flex gap, not a margin: two LTR runs in an Arabic line merge into one,
+                          which moves a margin to the wrong end. */}
+                      <span className="flex min-w-0 gap-3 text-xs text-fg-subtle">
+                        <span className="truncate">{item.category.name}</span>
+                        {item.barcode && <span className="shrink-0 tabular-nums">{item.barcode}</span>}
                       </span>
                     </span>
                     {out ? (
@@ -127,7 +129,7 @@ export default function ItemSearchAndCart({
                     ) : (
                       <span className="text-xs tabular-nums text-fg-subtle">{item.quantityInStock} left</span>
                     )}
-                    <span className="w-16 text-right font-semibold tabular-nums text-fg">
+                    <span className="w-16 text-end font-semibold tabular-nums text-fg">
                       {item.sellingPrice.toFixed(2)}
                     </span>
                   </button>
@@ -173,7 +175,7 @@ export default function ItemSearchAndCart({
                     aria-label={`Decrease ${line.name}`}
                     onClick={() => onUpdateQuantity(line.itemId, line.quantity - 1)}
                     disabled={line.quantity <= 1}
-                    className="flex size-10 items-center justify-center rounded-l-lg text-fg-muted hover:bg-surface-2 hover:text-fg disabled:opacity-40"
+                    className="flex size-10 items-center justify-center rounded-s-lg text-fg-muted hover:bg-surface-2 hover:text-fg disabled:opacity-40"
                   >
                     <Minus className="size-4" />
                   </button>
@@ -192,13 +194,13 @@ export default function ItemSearchAndCart({
                     onClick={() => onUpdateQuantity(line.itemId, line.quantity + 1)}
                     disabled={line.quantity >= line.quantityInStock}
                     title={line.quantity >= line.quantityInStock ? "No more in stock" : undefined}
-                    className="flex size-10 items-center justify-center rounded-r-lg text-fg-muted hover:bg-surface-2 hover:text-fg disabled:opacity-40"
+                    className="flex size-10 items-center justify-center rounded-e-lg text-fg-muted hover:bg-surface-2 hover:text-fg disabled:opacity-40"
                   >
                     <Plus className="size-4" />
                   </button>
                 </div>
 
-                <p className="w-20 text-right font-semibold tabular-nums text-fg">
+                <p className="w-20 text-end font-semibold tabular-nums text-fg">
                   {(line.sellingPrice * line.quantity).toFixed(2)}
                 </p>
 

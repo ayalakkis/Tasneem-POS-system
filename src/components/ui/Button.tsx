@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Loader2, type LucideIcon } from "lucide-react";
 import type { ComponentProps, ReactNode } from "react";
 import { cn } from "./cn";
+import { rtlFlip } from "./directional";
 
 export type ButtonVariant = "primary" | "secondary" | "ghost" | "danger" | "danger-ghost";
 export type ButtonSize = "sm" | "md" | "lg";
@@ -59,9 +60,9 @@ type ContentProps = {
 function Content({ icon: Icon, trailingIcon: Trailing, loading, children }: ContentProps) {
   return (
     <>
-      {loading ? <Loader2 className="animate-spin" aria-hidden /> : Icon && <Icon aria-hidden />}
+      {loading ? <Loader2 className="animate-spin" aria-hidden /> : Icon && <Icon className={rtlFlip(Icon)} aria-hidden />}
       {children}
-      {Trailing && <Trailing aria-hidden />}
+      {Trailing && <Trailing className={rtlFlip(Trailing)} aria-hidden />}
     </>
   );
 }

@@ -1,4 +1,5 @@
 export { cn } from "./cn";
+export { rtlFlip } from "./directional";
 export { Button, LinkButton, buttonClasses, type ButtonVariant, type ButtonSize } from "./Button";
 export { Input, Select, Textarea, Field, type ControlSize } from "./Input";
 export { Card, CardHeader, CardBody, CardFooter } from "./Card";

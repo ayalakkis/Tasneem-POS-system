@@ -47,8 +47,8 @@ export function TH({
     <th
       scope="col"
       className={cn(
-        "h-10 border-b border-border-strong px-3 text-left align-middle text-[11px] font-medium uppercase tracking-[0.06em] text-fg-subtle whitespace-nowrap first:pl-0 last:pr-0",
-        numeric && "text-right",
+        "h-10 border-b border-border-strong px-3 text-start align-middle text-[11px] font-medium uppercase tracking-[0.06em] text-fg-subtle whitespace-nowrap first:ps-0 last:pe-0",
+        numeric && "text-end",
         className,
       )}
       {...props}
@@ -64,8 +64,8 @@ export function TD({
   return (
     <td
       className={cn(
-        "border-b border-border px-3 py-3 align-middle text-fg-muted first:pl-0 last:pr-0",
-        numeric && "text-right tabular-nums",
+        "border-b border-border px-3 py-3 align-middle text-fg-muted first:ps-0 last:pe-0",
+        numeric && "text-end tabular-nums",
         className,
       )}
       {...props}

@@ -121,7 +121,7 @@ export default async function ItemsPage({
                       {item.quantityInStock}
                     </Badge>
                   </TD>
-                  <TD className="w-px whitespace-nowrap text-right">
+                  <TD className="w-px whitespace-nowrap text-end">
                     <div className="flex justify-end gap-1">
                       <LinkButton
                         href={`/admin/items/${item.id}`}

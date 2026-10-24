@@ -82,7 +82,7 @@ export default async function CustomerDetailPage({
                 <TD numeric className="font-medium text-fg">
                   {inv.totalAmount.toFixed(2)}
                 </TD>
-                <TD className="w-px text-right">
+                <TD className="w-px text-end">
                   <LinkButton href={`/invoices/${inv.id}`} variant="ghost" size="sm" icon={ReceiptText}>
                     Invoice
                   </LinkButton>

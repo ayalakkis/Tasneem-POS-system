@@ -87,8 +87,7 @@ export default function LoginForm() {
         size="lg"
         loading={submitting}
         trailingIcon={submitting ? undefined : ArrowRight}
-        // The arrow points forward: right in English, left in Arabic.
-        className="w-full [&_svg:last-child]:rtl:-scale-x-100"
+        className="w-full"
       >
         {submitting ? t.login.signingIn : t.login.signIn}
       </Button>

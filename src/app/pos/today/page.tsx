@@ -78,7 +78,7 @@ export default async function TodaysInvoicesPage() {
                     {inv.totalAmount.toFixed(2)}
                   </TD>
                   <TD>{inv.createdBy.username}</TD>
-                  <TD className="w-px text-right">
+                  <TD className="w-px text-end">
                     <LinkButton href={`/invoices/${inv.id}`} variant="ghost" size="sm" icon={ReceiptText}>
                       View / print
                     </LinkButton>

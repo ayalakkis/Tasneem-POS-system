@@ -99,7 +99,7 @@ export default async function InvoicePage({
               <dt className="text-xs text-stone-500">Date</dt>
               <dd className="mt-0.5 font-medium tabular-nums">{dateFormat.format(invoice.date)}</dd>
             </div>
-            <div className="text-right">
+            <div className="text-end">
               <dt className="text-xs text-stone-500">Customer</dt>
               <dd className="mt-0.5 font-medium">{invoice.customer?.name ?? "Guest"}</dd>
               {invoice.customer && <dd className="tabular-nums text-stone-600">{invoice.customer.phone}</dd>}
@@ -122,19 +122,19 @@ export default async function InvoicePage({
           <table className="mt-7 w-full border-collapse text-sm">
             <thead>
               <tr className="border-b border-stone-300 text-[11px] uppercase tracking-[0.08em] text-stone-500">
-                <th scope="col" className="pb-2 pr-3 text-left font-medium">Item</th>
-                <th scope="col" className="w-12 pb-2 pr-3 text-right font-medium">Qty</th>
-                <th scope="col" className="w-20 pb-2 pr-3 text-right font-medium">Price</th>
-                <th scope="col" className="w-24 pb-2 text-right font-medium">Amount</th>
+                <th scope="col" className="pb-2 pe-3 text-start font-medium">Item</th>
+                <th scope="col" className="w-12 pb-2 pe-3 text-end font-medium">Qty</th>
+                <th scope="col" className="w-20 pb-2 pe-3 text-end font-medium">Price</th>
+                <th scope="col" className="w-24 pb-2 text-end font-medium">Amount</th>
               </tr>
             </thead>
             <tbody>
               {invoice.items.map((line) => (
                 <tr key={line.id} className="border-b border-dashed border-stone-200">
-                  <td className="py-3 pr-3 font-medium">{line.item.name}</td>
-                  <td className="py-3 pr-3 text-right tabular-nums text-stone-600">{line.quantity}</td>
-                  <td className="py-3 pr-3 text-right tabular-nums text-stone-600">{line.unitPrice.toFixed(2)}</td>
-                  <td className="py-3 text-right font-medium tabular-nums">{line.subtotal.toFixed(2)}</td>
+                  <td className="py-3 pe-3 font-medium">{line.item.name}</td>
+                  <td className="py-3 pe-3 text-end tabular-nums text-stone-600">{line.quantity}</td>
+                  <td className="py-3 pe-3 text-end tabular-nums text-stone-600">{line.unitPrice.toFixed(2)}</td>
+                  <td className="py-3 text-end font-medium tabular-nums">{line.subtotal.toFixed(2)}</td>
                 </tr>
               ))}
             </tbody>
@@ -144,7 +144,7 @@ export default async function InvoicePage({
             <p className="text-xs text-stone-500 tabular-nums">
               {units} item{units === 1 ? "" : "s"}
             </p>
-            <div className="text-right">
+            <div className="text-end">
               <p className="text-xs uppercase tracking-[0.12em] text-stone-500">Total</p>
               <p className="mt-1 text-3xl font-semibold tracking-tight tabular-nums text-green-800">
                 {invoice.totalAmount.toFixed(2)}
