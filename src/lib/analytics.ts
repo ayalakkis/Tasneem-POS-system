@@ -1,5 +1,6 @@
 import { prisma } from "./prisma";
 import { notCancelled } from "./salesFilters";
+import { getProfitEvents } from "./profit";
 import type { DeliveryStatus } from "@prisma/client";
 
 /**
@@ -20,20 +21,7 @@ export async function getProfitByDay(days: number) {
   const start = new Date(end);
   start.setDate(start.getDate() - days);
 
-  const items = await prisma.salesInvoiceItem.findMany({
-    where: {
-      salesInvoice: {
-        date: { gte: start, lt: end },
-        ...notCancelled,
-      },
-    },
-    select: {
-      unitPrice: true,
-      unitCost: true,
-      quantity: true,
-      salesInvoice: { select: { date: true } },
-    },
-  });
+  const events = await getProfitEvents(start, end);
 
   const dayKeys: string[] = [];
   const labels = new Map<string, string>();
@@ -47,10 +35,9 @@ export async function getProfitByDay(days: number) {
     totals.set(key, 0);
   }
 
-  for (const line of items) {
-    const key = localDateKey(line.salesInvoice.date);
-    const profit = (line.unitPrice - line.unitCost) * line.quantity;
-    totals.set(key, (totals.get(key) ?? 0) + profit);
+  for (const event of events) {
+    const key = localDateKey(event.date);
+    totals.set(key, (totals.get(key) ?? 0) + event.profit);
   }
 
   return dayKeys.map((key) => ({
@@ -78,25 +65,41 @@ export async function getDeliveryStatusCounts(): Promise<Record<DeliveryStatus, 
   return counts;
 }
 
+/**
+ * Net revenue per category: line subtotals with the whole-sale discount spread
+ * over lines in proportion to their size, minus refunds made in the range.
+ */
 export async function getRevenueByCategory(start: Date, end: Date) {
-  const items = await prisma.salesInvoiceItem.findMany({
-    where: {
-      salesInvoice: {
-        date: { gte: start, lt: end },
-        ...notCancelled,
+  const category = { item: { select: { category: { select: { name: true } } } } } as const;
+  const [items, returned] = await Promise.all([
+    prisma.salesInvoiceItem.findMany({
+      where: {
+        salesInvoice: {
+          date: { gte: start, lt: end },
+          ...notCancelled,
+        },
       },
-    },
-    select: {
-      subtotal: true,
-      item: { select: { category: { select: { name: true } } } },
-    },
-  });
+      select: {
+        subtotal: true,
+        salesInvoice: { select: { totalAmount: true, discountAmount: true } },
+        ...category,
+      },
+    }),
+    prisma.salesReturnItem.findMany({
+      where: { salesReturn: { date: { gte: start, lt: end }, salesInvoice: notCancelled } },
+      select: { refundAmount: true, salesInvoiceItem: { select: category } },
+    }),
+  ]);
 
   const byCategory = new Map<string, number>();
+  const add = (name: string, amount: number) => byCategory.set(name, (byCategory.get(name) ?? 0) + amount);
   for (const line of items) {
-    const name = line.item.category.name;
-    byCategory.set(name, (byCategory.get(name) ?? 0) + line.subtotal);
+    const { totalAmount, discountAmount } = line.salesInvoice;
+    const itemsTotal = totalAmount + discountAmount;
+    const share = itemsTotal > 0 ? line.subtotal / itemsTotal : 0;
+    add(line.item.category.name, line.subtotal - discountAmount * share);
   }
+  for (const r of returned) add(r.salesInvoiceItem.item.category.name, -r.refundAmount);
 
   return Array.from(byCategory.entries())
     .map(([category, revenue]) => ({ category, revenue: Math.round(revenue * 100) / 100 }))

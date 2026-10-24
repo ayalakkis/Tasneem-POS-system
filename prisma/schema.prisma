@@ -29,6 +29,7 @@ model User {
 
   purchaseInvoices PurchaseInvoice[]
   salesInvoices    SalesInvoice[]
+  salesReturns     SalesReturn[]
 }
 
 model Category {
@@ -81,26 +82,68 @@ model SalesInvoice {
   id          String    @id @default(cuid())
   customerId  String?
   customer    Customer? @relation(fields: [customerId], references: [id])
+  /// What the customer paid: sum of line subtotals minus `discountAmount`.
   totalAmount Float
   date        DateTime  @default(now())
   createdById String
   createdBy   User      @relation(fields: [createdById], references: [id])
 
+  /// Discount on the whole sale, in money (a percentage is converted at checkout).
+  discountAmount Float  @default(0)
+  /// Cash handed over and change given back. Null on deliveries and older sales.
+  cashReceived   Float?
+  changeGiven    Float?
+
   isDelivery      Boolean         @default(false)
   deliveryAddress String?
   deliveryStatus  DeliveryStatus?
 
-  items SalesInvoiceItem[]
+  items   SalesInvoiceItem[]
+  returns SalesReturn[]
 }
 
 model SalesInvoiceItem {
+  id               String       @id @default(cuid())
+  salesInvoiceId   String
+  salesInvoice     SalesInvoice @relation(fields: [salesInvoiceId], references: [id])
+  itemId           String
+  item             Item         @relation(fields: [itemId], references: [id])
+  quantity         Int
+  unitPrice        Float
+  unitCost         Float
+  /// Discount on this line, in money.
+  discountAmount   Float        @default(0)
+  /// unitPrice × quantity − discountAmount.
+  subtotal         Float
+  /// Units already returned, so a line can't be refunded twice.
+  returnedQuantity Int          @default(0)
+
+  returnItems SalesReturnItem[]
+}
+
+/// Items brought back from a sale. The sale itself is never edited.
+model SalesReturn {
   id             String       @id @default(cuid())
   salesInvoiceId String
   salesInvoice   SalesInvoice @relation(fields: [salesInvoiceId], references: [id])
-  itemId         String
-  item           Item         @relation(fields: [itemId], references: [id])
-  quantity       Int
-  unitPrice      Float
-  unitCost       Float
-  subtotal       Float
+  date           DateTime     @default(now())
+  /// Cash paid back to the customer.
+  refundAmount   Float
+  reason         String?
+  createdById    String
+  createdBy      User         @relation(fields: [createdById], references: [id])
+
+  items SalesReturnItem[]
+}
+
+model SalesReturnItem {
+  id                 String           @id @default(cuid())
+  salesReturnId      String
+  salesReturn        SalesReturn      @relation(fields: [salesReturnId], references: [id])
+  salesInvoiceItemId String
+  salesInvoiceItem   SalesInvoiceItem @relation(fields: [salesInvoiceItemId], references: [id])
+  quantity           Int
+  refundAmount       Float
+  /// Copied from the sale line so profit reverses at the original cost.
+  unitCost           Float
 }

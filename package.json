@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "db:seed": "tsx prisma/seed.ts",
-    "db:seed-demo": "tsx prisma/seed-demo.ts"
+    "db:seed-demo": "tsx prisma/seed-demo.ts",
+    "check:money": "tsx scripts/check-money.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
