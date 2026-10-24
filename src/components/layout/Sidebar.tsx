@@ -19,6 +19,7 @@ import { SHOP_NAME } from "@/lib/config";
 import { LogoMark } from "@/components/brand/Logo";
 import LogoutButton from "@/components/LogoutButton";
 import { cn } from "@/components/ui";
+import { useI18n } from "@/i18n/I18nProvider";
 
 export const ICONS = {
   dashboard: LayoutDashboard,
@@ -44,8 +45,6 @@ export function isActive(pathname: string, href: string) {
   return EXACT_MATCH_ROOTS.has(href) ? pathname === href : pathname.startsWith(href);
 }
 
-const ROLE_LABEL: Record<string, string> = { ADMIN: "Administrator", EMPLOYEE: "Cashier" };
-
 export default function Sidebar({
   sections,
   footer = [],
@@ -58,15 +57,16 @@ export default function Sidebar({
   onNavigate?: () => void;
 }) {
   const pathname = usePathname();
+  const { t } = useI18n();
 
   return (
     <div className="flex h-full flex-col bg-sidebar text-sidebar-fg">
       <div className="flex items-center gap-3 px-6 pb-6 pt-7">
-        <LogoMark className="h-12 w-auto text-sidebar-fg" />
+        <LogoMark title={t.shell.logo} className="h-12 w-auto text-sidebar-fg" />
         {SHOP_NAME && <span className="text-sm font-semibold">{SHOP_NAME}</span>}
       </div>
 
-      <nav className="flex-1 space-y-6 overflow-y-auto px-3" aria-label="Main">
+      <nav className="flex-1 space-y-6 overflow-y-auto px-3" aria-label={t.nav.main}>
         {sections.map((section) => (
           <div key={section.title}>
             <p className="mb-2 px-3 text-[11px] font-medium uppercase tracking-[0.12em] text-sidebar-muted/80">
@@ -102,7 +102,7 @@ export default function Sidebar({
         </div>
         <div className="min-w-0 flex-1">
           <p className="truncate text-sm font-medium">{user.username}</p>
-          <p className="truncate text-xs text-sidebar-muted">{ROLE_LABEL[user.role] ?? user.role}</p>
+          <p className="truncate text-xs text-sidebar-muted">{t.roles[user.role as keyof typeof t.roles] ?? user.role}</p>
         </div>
         <LogoutButton />
       </div>
@@ -136,7 +136,7 @@ function SidebarLink({
       <span
         aria-hidden
         className={cn(
-          "absolute -left-[3px] size-1.5 rotate-45 bg-accent transition-opacity",
+          "absolute -start-[3px] size-1.5 rotate-45 bg-accent transition-opacity",
           active ? "opacity-100" : "opacity-0",
         )}
       />

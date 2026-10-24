@@ -340,6 +340,14 @@
     -moz-osx-font-smoothing: grayscale;
   }
 
+  /*
+   * Arabic is a joined script: letter-spacing pulls the connected letters
+   * apart, so the tracking used on small caps labels is switched off.
+   */
+  :lang(ar) {
+    letter-spacing: normal !important;
+  }
+
   ::selection {
     background: color-mix(in srgb, var(--accent) 30%, transparent);
   }

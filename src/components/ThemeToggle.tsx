@@ -3,12 +3,9 @@
 import { useState } from "react";
 import { Monitor, Moon, Sun, type LucideIcon } from "lucide-react";
 import { THEME_COOKIE, THEMES, type Theme } from "@/lib/theme";
+import { useI18n } from "@/i18n/I18nProvider";
 
-const OPTIONS: Record<Theme, { icon: LucideIcon; label: string }> = {
-  system: { icon: Monitor, label: "System theme" },
-  light: { icon: Sun, label: "Light theme" },
-  dark: { icon: Moon, label: "Dark theme" },
-};
+const ICONS: Record<Theme, LucideIcon> = { system: Monitor, light: Sun, dark: Moon };
 
 function applyTheme(theme: Theme) {
   const root = document.documentElement;
@@ -33,6 +30,7 @@ export default function ThemeToggle({
   className?: string;
 }) {
   const [theme, setTheme] = useState<Theme>(initial);
+  const { t } = useI18n();
 
   function choose(next: Theme) {
     applyTheme(next);
@@ -42,11 +40,12 @@ export default function ThemeToggle({
   return (
     <div
       role="radiogroup"
-      aria-label="Color theme"
+      aria-label={t.theme.label}
       className={`inline-flex items-center gap-0.5 rounded-full border border-border bg-surface-2 p-0.5 ${className}`}
     >
       {THEMES.map((value) => {
-        const { icon: Icon, label } = OPTIONS[value];
+        const Icon = ICONS[value];
+        const label = t.theme[value];
         const active = theme === value;
         return (
           <button

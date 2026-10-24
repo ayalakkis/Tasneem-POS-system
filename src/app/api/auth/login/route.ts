@@ -2,15 +2,17 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { verifyPassword } from "@/lib/password";
 import { getSession } from "@/lib/session";
+import { getI18n } from "@/i18n/server";
 
 export async function POST(request: NextRequest) {
+  const { t } = await getI18n();
   const body = await request.json().catch(() => null);
   const username = typeof body?.username === "string" ? body.username.trim() : "";
   const password = typeof body?.password === "string" ? body.password : "";
 
   if (!username || !password) {
     return NextResponse.json(
-      { error: "Username and password are required" },
+      { error: t.errors.credentialsRequired },
       { status: 400 }
     );
   }
@@ -18,7 +20,7 @@ export async function POST(request: NextRequest) {
   const user = await prisma.user.findUnique({ where: { username } });
   if (!user || !(await verifyPassword(password, user.passwordHash))) {
     return NextResponse.json(
-      { error: "Invalid username or password" },
+      { error: t.errors.invalidCredentials },
       { status: 401 }
     );
   }

@@ -1,11 +1,13 @@
 import { LogoMark } from "@/components/brand/Logo";
 import { ArchFrame, Diamond } from "@/components/brand/Motifs";
 import ThemeToggle from "@/components/ThemeToggle";
+import LanguageSwitch from "@/components/LanguageSwitch";
+import { getI18n } from "@/i18n/server";
 import { getTheme } from "@/lib/theme-server";
 import LoginForm from "./LoginForm";
 
 export default async function LoginPage() {
-  const theme = await getTheme();
+  const [theme, { t }] = await Promise.all([getTheme(), getI18n()]);
 
   return (
     <div className="grid min-h-dvh bg-bg lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)]">
@@ -18,29 +20,32 @@ export default async function LoginPage() {
         <ArchFrame className="absolute left-1/2 top-1/2 h-[78%] w-auto -translate-x-1/2 -translate-y-[46%] text-sidebar-fg/10" />
         <ArchFrame className="absolute left-1/2 top-1/2 h-[64%] w-auto -translate-x-1/2 -translate-y-[44%] text-sidebar-fg/[0.06]" />
         <LogoMark
-          title="Shop logo"
+          title={t.shell.logo}
           className="relative h-56 w-auto text-sidebar-fg drop-shadow-[0_18px_40px_rgb(0_0_0/0.35)]"
         />
         <p className="absolute bottom-10 flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-sidebar-muted">
           <Diamond />
-          Point of sale
+          {t.login.tagline}
           <Diamond />
         </p>
       </aside>
 
       <main className="relative flex flex-col px-6 py-8 sm:px-10">
         <div className="flex justify-end">
-          <ThemeToggle initial={theme} />
+          <div className="flex items-center gap-2">
+            <LanguageSwitch />
+            <ThemeToggle initial={theme} />
+          </div>
         </div>
 
         <div className="mx-auto flex w-full max-w-sm flex-1 flex-col justify-center py-10">
-          <LogoMark className="mb-10 h-16 w-auto self-start text-primary lg:hidden" />
-          <h1 className="text-[28px] font-semibold leading-9 tracking-tight text-fg">Welcome back</h1>
-          <p className="mb-8 mt-1.5 text-sm text-fg-muted">Sign in with your staff account to continue.</p>
+          <LogoMark title={t.shell.logo} className="mb-10 h-16 w-auto self-start text-primary lg:hidden" />
+          <h1 className="text-[28px] font-semibold leading-9 tracking-tight text-fg">{t.login.welcome}</h1>
+          <p className="mb-8 mt-1.5 text-sm text-fg-muted">{t.login.subtitle}</p>
           <LoginForm />
         </div>
 
-        <p className="text-center text-xs text-fg-subtle">Forgot your password? Ask an administrator to reset it.</p>
+        <p className="text-center text-xs text-fg-subtle">{t.login.forgot}</p>
       </main>
     </div>
   );

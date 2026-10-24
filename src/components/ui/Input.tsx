@@ -19,15 +19,16 @@ const SIZES: Record<ControlSize, string> = {
   lg: "h-12 text-base",
 };
 
-// Left/right padding are set separately (never px-*) so an icon or chevron
+// Start/end padding are set separately (never px-*) so an icon or chevron
 // can widen one side without two utilities fighting over the same property.
-const PAD_LEFT: Record<ControlSize, string> = { sm: "pl-2.5", md: "pl-3", lg: "pl-4" };
-const PAD_RIGHT: Record<ControlSize, string> = { sm: "pr-2.5", md: "pr-3", lg: "pr-4" };
-const ICON_PAD: Record<ControlSize, string> = { sm: "pl-8", md: "pl-9", lg: "pl-11" };
+// Logical sides (start/end) mirror automatically in Arabic.
+const PAD_START: Record<ControlSize, string> = { sm: "ps-2.5", md: "ps-3", lg: "ps-4" };
+const PAD_END: Record<ControlSize, string> = { sm: "pe-2.5", md: "pe-3", lg: "pe-4" };
+const ICON_PAD: Record<ControlSize, string> = { sm: "ps-8", md: "ps-9", lg: "ps-11" };
 const ICON_POS: Record<ControlSize, string> = {
-  sm: "left-2.5 size-3.5",
-  md: "left-3 size-4",
-  lg: "left-4 size-[18px]",
+  sm: "start-2.5 size-3.5",
+  md: "start-3 size-4",
+  lg: "start-4 size-[18px]",
 };
 
 export function Input({
@@ -48,8 +49,8 @@ export function Input({
       className={cn(
         CONTROL,
         SIZES[size],
-        Icon ? ICON_PAD[size] : PAD_LEFT[size],
-        PAD_RIGHT[size],
+        Icon ? ICON_PAD[size] : PAD_START[size],
+        PAD_END[size],
         props.type === "number" && "tabular-nums",
         !Icon && className,
       )}
@@ -79,14 +80,14 @@ export function Select({
     <div className={cn("relative", className)}>
       <select
         aria-invalid={invalid || undefined}
-        className={cn(CONTROL, SIZES[size], PAD_LEFT[size], "appearance-none pr-9")}
+        className={cn(CONTROL, SIZES[size], PAD_START[size], "appearance-none pe-9")}
         {...props}
       >
         {children}
       </select>
       <ChevronDown
         aria-hidden
-        className="pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 text-fg-subtle"
+        className="pointer-events-none absolute end-3 top-1/2 size-4 -translate-y-1/2 text-fg-subtle"
       />
     </div>
   );
@@ -100,7 +101,7 @@ export function Textarea({
   return (
     <textarea
       aria-invalid={invalid || undefined}
-      className={cn(CONTROL, "min-h-20 pl-3 pr-3 py-2 text-sm leading-relaxed", className)}
+      className={cn(CONTROL, "min-h-20 ps-3 pe-3 py-2 text-sm leading-relaxed", className)}
       {...props}
     />
   );
