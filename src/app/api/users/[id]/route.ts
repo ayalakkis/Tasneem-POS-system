@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getI18n } from "@/i18n/server";
+import { fill } from "@/i18n/plural";
 import { prisma } from "@/lib/prisma";
 import { requireApiRole } from "@/lib/auth";
 import { hashPassword, USERNAME_PATTERN, MIN_PASSWORD_LENGTH } from "@/lib/password";
@@ -12,6 +14,7 @@ export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const { t } = await getI18n();
   const auth = await requireApiRole("ADMIN");
   if ("error" in auth) return auth.error;
   const { id } = await params;
@@ -22,17 +25,17 @@ export async function PATCH(
   const password = typeof body?.password === "string" ? body.password : "";
 
   if (!name) {
-    return NextResponse.json({ error: "Name is required" }, { status: 400 });
+    return NextResponse.json({ error: t.errors.nameRequired }, { status: 400 });
   }
   if (!USERNAME_PATTERN.test(username)) {
     return NextResponse.json(
-      { error: "Username must be 3-30 characters: letters, numbers, dots, underscores, or hyphens" },
+      { error: t.errors.usernameInvalid },
       { status: 400 }
     );
   }
   if (password && password.length < MIN_PASSWORD_LENGTH) {
     return NextResponse.json(
-      { error: `Password must be at least ${MIN_PASSWORD_LENGTH} characters` },
+      { error: fill(t.errors.passwordTooShort, { n: MIN_PASSWORD_LENGTH }) },
       { status: 400 }
     );
   }
@@ -41,7 +44,7 @@ export async function PATCH(
     where: { username, NOT: { id } },
   });
   if (existing) {
-    return NextResponse.json({ error: "That username is already taken" }, { status: 409 });
+    return NextResponse.json({ error: t.errors.usernameTaken }, { status: 409 });
   }
 
   try {
@@ -56,10 +59,10 @@ export async function PATCH(
     return NextResponse.json({ id: user.id, name: user.name, username: user.username, role: user.role });
   } catch (e) {
     if (isUniqueConstraintError(e)) {
-      return NextResponse.json({ error: "That username is already taken" }, { status: 409 });
+      return NextResponse.json({ error: t.errors.usernameTaken }, { status: 409 });
     }
     if (isNotFoundError(e)) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
+      return NextResponse.json({ error: t.errors.userNotFound }, { status: 404 });
     }
     throw e;
   }
@@ -69,24 +72,25 @@ export async function DELETE(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const { t } = await getI18n();
   const auth = await requireApiRole("ADMIN");
   if ("error" in auth) return auth.error;
   const { id } = await params;
 
   if (id === auth.session.userId) {
-    return NextResponse.json({ error: "You cannot delete your own account" }, { status: 400 });
+    return NextResponse.json({ error: t.errors.cantDeleteSelf }, { status: 400 });
   }
 
   const target = await prisma.user.findUnique({ where: { id } });
   if (!target) {
-    return NextResponse.json({ error: "User not found" }, { status: 404 });
+    return NextResponse.json({ error: t.errors.userNotFound }, { status: 404 });
   }
 
   if (target.role === "ADMIN") {
     const adminCount = await prisma.user.count({ where: { role: "ADMIN" } });
     if (adminCount <= 1) {
       return NextResponse.json(
-        { error: "Cannot delete the last remaining admin account" },
+        { error: t.errors.lastAdmin },
         { status: 400 }
       );
     }
@@ -98,12 +102,12 @@ export async function DELETE(
   } catch (e) {
     if (isForeignKeyConstraintError(e)) {
       return NextResponse.json(
-        { error: "Cannot delete a user who has recorded purchases or sales" },
+        { error: t.errors.userHasHistory },
         { status: 409 }
       );
     }
     if (isNotFoundError(e)) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
+      return NextResponse.json({ error: t.errors.userNotFound }, { status: 404 });
     }
     throw e;
   }

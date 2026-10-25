@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getI18n } from "@/i18n/server";
 import { prisma } from "@/lib/prisma";
 import { verifyPassword } from "@/lib/password";
 import { getSession } from "@/lib/session";
-import { getI18n } from "@/i18n/server";
 
 export async function POST(request: NextRequest) {
   const { t } = await getI18n();

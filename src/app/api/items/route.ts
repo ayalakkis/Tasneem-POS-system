@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getI18n } from "@/i18n/server";
 import { prisma } from "@/lib/prisma";
 import { requireApiRole } from "@/lib/auth";
 import { isUniqueConstraintError } from "@/lib/prisma-errors";
@@ -24,6 +25,7 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  const { t } = await getI18n();
   const auth = await requireApiRole("ADMIN");
   if ("error" in auth) return auth.error;
 
@@ -39,12 +41,12 @@ export async function POST(request: NextRequest) {
 
   if (!name || !categoryId || !Number.isFinite(costPrice) || !Number.isFinite(sellingPrice)) {
     return NextResponse.json(
-      { error: "Name, category, cost price, and selling price are required" },
+      { error: t.errors.itemFieldsRequired },
       { status: 400 }
     );
   }
   if (costPrice < 0 || sellingPrice < 0) {
-    return NextResponse.json({ error: "Prices cannot be negative" }, { status: 400 });
+    return NextResponse.json({ error: t.errors.negativePrice }, { status: 400 });
   }
 
   try {
@@ -55,7 +57,7 @@ export async function POST(request: NextRequest) {
   } catch (e) {
     if (isUniqueConstraintError(e)) {
       return NextResponse.json(
-        { error: "An item with this barcode already exists" },
+        { error: t.errors.barcodeExists },
         { status: 409 }
       );
     }

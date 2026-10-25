@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getI18n } from "@/i18n/server";
+import { fill } from "@/i18n/plural";
 import { prisma } from "@/lib/prisma";
 import { requireApiRole } from "@/lib/auth";
 
@@ -20,6 +22,7 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
+  const { t } = await getI18n();
   const auth = await requireApiRole("ADMIN", "EMPLOYEE");
   if ("error" in auth) return auth.error;
 
@@ -31,12 +34,12 @@ export async function POST(request: NextRequest) {
 
   if (!customerId || !deliveryAddress) {
     return NextResponse.json(
-      { error: "A customer and delivery address are required" },
+      { error: t.errors.customerAndAddressRequired },
       { status: 400 }
     );
   }
   if (lines.length === 0) {
-    return NextResponse.json({ error: "At least one item is required" }, { status: 400 });
+    return NextResponse.json({ error: t.errors.itemsRequired }, { status: 400 });
   }
 
   const parsedLines: { itemId: string; quantity: number }[] = [];
@@ -45,7 +48,7 @@ export async function POST(request: NextRequest) {
     const quantity = Number(line?.quantity);
     if (!itemId || !Number.isInteger(quantity) || quantity <= 0) {
       return NextResponse.json(
-        { error: "Each line needs a valid item and a positive whole quantity" },
+        { error: t.errors.invalidLine },
         { status: 400 }
       );
     }
@@ -54,7 +57,7 @@ export async function POST(request: NextRequest) {
 
   const customer = await prisma.customer.findUnique({ where: { id: customerId } });
   if (!customer) {
-    return NextResponse.json({ error: "Customer not found" }, { status: 404 });
+    return NextResponse.json({ error: t.errors.customerNotFound }, { status: 404 });
   }
 
   const itemIds = parsedLines.map((l) => l.itemId);
@@ -64,11 +67,11 @@ export async function POST(request: NextRequest) {
   for (const line of parsedLines) {
     const item = itemById.get(line.itemId);
     if (!item) {
-      return NextResponse.json({ error: "One of the items no longer exists" }, { status: 404 });
+      return NextResponse.json({ error: t.errors.itemGone }, { status: 404 });
     }
     if (item.quantityInStock < line.quantity) {
       return NextResponse.json(
-        { error: `Not enough stock for "${item.name}" (${item.quantityInStock} available)` },
+        { error: fill(t.errors.notEnoughStock, { name: item.name, count: item.quantityInStock }) },
         { status: 409 }
       );
     }

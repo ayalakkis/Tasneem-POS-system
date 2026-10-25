@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getI18n } from "@/i18n/server";
 import { prisma } from "@/lib/prisma";
 import { requireApiRole } from "@/lib/auth";
 import type { DeliveryStatus } from "@prisma/client";
@@ -14,6 +15,7 @@ export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const { t } = await getI18n();
   const auth = await requireApiRole("ADMIN", "EMPLOYEE");
   if ("error" in auth) return auth.error;
   const { id } = await params;
@@ -21,7 +23,7 @@ export async function PATCH(
   const body = await request.json().catch(() => null);
   const status = typeof body?.status === "string" ? body.status : "";
   if (!VALID_STATUSES.includes(status as DeliveryStatus)) {
-    return NextResponse.json({ error: "Invalid status" }, { status: 400 });
+    return NextResponse.json({ error: t.errors.invalidStatus }, { status: 400 });
   }
 
   const invoice = await prisma.salesInvoice.findUnique({
@@ -30,11 +32,11 @@ export async function PATCH(
   });
 
   if (!invoice || !invoice.isDelivery) {
-    return NextResponse.json({ error: "Delivery order not found" }, { status: 404 });
+    return NextResponse.json({ error: t.errors.deliveryNotFound }, { status: 404 });
   }
 
   if (invoice.deliveryStatus === "CANCELLED") {
-    return NextResponse.json({ error: "This order is already cancelled" }, { status: 409 });
+    return NextResponse.json({ error: t.errors.alreadyCancelled }, { status: 409 });
   }
 
   const shouldRestoreStock = status === "CANCELLED";

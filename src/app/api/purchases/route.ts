@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getI18n } from "@/i18n/server";
 import { prisma } from "@/lib/prisma";
 import { requireApiRole } from "@/lib/auth";
 
@@ -14,6 +15,7 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
+  const { t } = await getI18n();
   const auth = await requireApiRole("ADMIN");
   if ("error" in auth) return auth.error;
 
@@ -37,14 +39,14 @@ export async function POST(request: NextRequest) {
     Number.isNaN(date.getTime())
   ) {
     return NextResponse.json(
-      { error: "Item, a positive whole quantity, unit cost, and total paid are required" },
+      { error: t.errors.purchaseFieldsRequired },
       { status: 400 }
     );
   }
 
   const item = await prisma.item.findUnique({ where: { id: itemId } });
   if (!item) {
-    return NextResponse.json({ error: "Item not found" }, { status: 404 });
+    return NextResponse.json({ error: t.errors.itemNotFound }, { status: 404 });
   }
 
   const [purchase] = await prisma.$transaction([

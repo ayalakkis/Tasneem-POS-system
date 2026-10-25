@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getI18n } from "@/i18n/server";
 import { prisma } from "@/lib/prisma";
 import { requireApiRole } from "@/lib/auth";
 import {
@@ -11,6 +12,7 @@ export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const { t } = await getI18n();
   const auth = await requireApiRole("ADMIN");
   if ("error" in auth) return auth.error;
   const { id } = await params;
@@ -18,7 +20,7 @@ export async function PATCH(
   const body = await request.json().catch(() => null);
   const name = typeof body?.name === "string" ? body.name.trim() : "";
   if (!name) {
-    return NextResponse.json({ error: "Name is required" }, { status: 400 });
+    return NextResponse.json({ error: t.errors.nameRequired }, { status: 400 });
   }
 
   try {
@@ -27,12 +29,12 @@ export async function PATCH(
   } catch (e) {
     if (isUniqueConstraintError(e)) {
       return NextResponse.json(
-        { error: "A category with this name already exists" },
+        { error: t.errors.categoryExists },
         { status: 409 }
       );
     }
     if (isNotFoundError(e)) {
-      return NextResponse.json({ error: "Category not found" }, { status: 404 });
+      return NextResponse.json({ error: t.errors.categoryNotFound }, { status: 404 });
     }
     throw e;
   }
@@ -42,6 +44,7 @@ export async function DELETE(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const { t } = await getI18n();
   const auth = await requireApiRole("ADMIN");
   if ("error" in auth) return auth.error;
   const { id } = await params;
@@ -54,13 +57,13 @@ export async function DELETE(
       return NextResponse.json(
         {
           error:
-            "Cannot delete a category that still has items. Reassign or delete those items first.",
+            t.errors.categoryHasItems,
         },
         { status: 409 }
       );
     }
     if (isNotFoundError(e)) {
-      return NextResponse.json({ error: "Category not found" }, { status: 404 });
+      return NextResponse.json({ error: t.errors.categoryNotFound }, { status: 404 });
     }
     throw e;
   }

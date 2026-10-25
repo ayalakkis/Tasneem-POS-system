@@ -6,6 +6,7 @@ import { requirePageUser } from "@/lib/auth";
 import { SHOP_NAME } from "@/lib/config";
 import { LogoMark } from "@/components/brand/Logo";
 import { getI18n } from "@/i18n/server";
+import { fill } from "@/i18n/plural";
 import InvoiceToolbar from "./InvoiceToolbar";
 
 // The receipt is a printed document, so the "paper" uses fixed light brand
@@ -17,14 +18,6 @@ const STATUS_PILL: Record<DeliveryStatus, string> = {
   DELIVERED: "bg-green-100 text-green-800",
   CANCELLED: "bg-[#f6e2de] text-[#8e3328]",
 };
-
-const dateFormat = new Intl.DateTimeFormat("en-GB", {
-  day: "numeric",
-  month: "long",
-  year: "numeric",
-  hour: "2-digit",
-  minute: "2-digit",
-});
 
 function DiamondRule() {
   return (
@@ -42,7 +35,7 @@ export default async function InvoicePage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const [, { t }] = await Promise.all([requirePageUser(), getI18n()]);
+  const [, { t, f, n, locale }] = await Promise.all([requirePageUser(), getI18n()]);
   const { id } = await params;
 
   const invoice = await prisma.salesInvoice.findUnique({
@@ -84,24 +77,24 @@ export default async function InvoicePage({
           <div aria-hidden className="absolute inset-x-0 top-0 h-1.5 bg-green-800 print:hidden" />
 
           <header className="flex flex-col items-center text-center">
-            <LogoMark title="Shop logo" className="h-20 w-auto text-green-800" />
+            <LogoMark title={t.shell.logo} className="h-20 w-auto text-green-800" />
             {SHOP_NAME && <p className="mt-3 text-lg font-semibold">{SHOP_NAME}</p>}
             <p className="mt-4 text-[11px] font-medium uppercase tracking-[0.2em] text-brass-600">
-              {invoice.isDelivery ? "Delivery order" : "Sales invoice"}
+              {invoice.isDelivery ? t.invoice.deliveryOrder : t.invoice.salesInvoice}
             </p>
-            <p className="mt-1 text-sm tabular-nums text-stone-500">No. {number}</p>
+            <p className="mt-1 text-sm tabular-nums text-stone-500">{fill(t.invoice.number, { number })}</p>
           </header>
 
           <DiamondRule />
 
           <dl className="grid grid-cols-2 gap-x-6 gap-y-4 text-sm">
             <div>
-              <dt className="text-xs text-stone-500">Date</dt>
-              <dd className="mt-0.5 font-medium tabular-nums">{dateFormat.format(invoice.date)}</dd>
+              <dt className="text-xs text-stone-500">{t.invoice.date}</dt>
+              <dd className="mt-0.5 font-medium tabular-nums">{f.dateTime(invoice.date)}</dd>
             </div>
             <div className="text-end">
-              <dt className="text-xs text-stone-500">Customer</dt>
-              <dd className="mt-0.5 font-medium">{invoice.customer?.name ?? "Guest"}</dd>
+              <dt className="text-xs text-stone-500">{t.invoice.customer}</dt>
+              <dd className="mt-0.5 font-medium">{invoice.customer?.name ?? t.common.guest}</dd>
               {invoice.customer && <dd className="tabular-nums text-stone-600">{invoice.customer.phone}</dd>}
             </div>
           </dl>
@@ -110,7 +103,7 @@ export default async function InvoicePage({
             <div className="mt-5 flex items-start gap-3 rounded-xl bg-stone-100 px-4 py-3 text-sm print:border print:border-stone-300 print:bg-transparent">
               <MapPin className="mt-0.5 size-4 shrink-0 text-green-700" aria-hidden />
               <div className="min-w-0 flex-1">
-                <p className="text-xs text-stone-500">Deliver to</p>
+                <p className="text-xs text-stone-500">{t.invoice.deliverTo}</p>
                 <p className="font-medium">{invoice.deliveryAddress}</p>
               </div>
               <span className={`shrink-0 rounded-full px-2.5 py-0.5 text-xs font-medium ${STATUS_PILL[status]}`}>
@@ -122,10 +115,10 @@ export default async function InvoicePage({
           <table className="mt-7 w-full border-collapse text-sm">
             <thead>
               <tr className="border-b border-stone-300 text-[11px] uppercase tracking-[0.08em] text-stone-500">
-                <th scope="col" className="pb-2 pe-3 text-start font-medium">Item</th>
-                <th scope="col" className="w-12 pb-2 pe-3 text-end font-medium">Qty</th>
-                <th scope="col" className="w-20 pb-2 pe-3 text-end font-medium">Price</th>
-                <th scope="col" className="w-24 pb-2 text-end font-medium">Amount</th>
+                <th scope="col" className="pb-2 pe-3 text-start font-medium">{t.invoice.colItem}</th>
+                <th scope="col" className="w-12 pb-2 pe-3 text-end font-medium">{t.invoice.colQty}</th>
+                <th scope="col" className="w-20 pb-2 pe-3 text-end font-medium">{t.invoice.colPrice}</th>
+                <th scope="col" className="w-24 pb-2 text-end font-medium">{t.invoice.colAmount}</th>
               </tr>
             </thead>
             <tbody>
@@ -133,8 +126,8 @@ export default async function InvoicePage({
                 <tr key={line.id} className="border-b border-dashed border-stone-200">
                   <td className="py-3 pe-3 font-medium">{line.item.name}</td>
                   <td className="py-3 pe-3 text-end tabular-nums text-stone-600">{line.quantity}</td>
-                  <td className="py-3 pe-3 text-end tabular-nums text-stone-600">{line.unitPrice.toFixed(2)}</td>
-                  <td className="py-3 text-end font-medium tabular-nums">{line.subtotal.toFixed(2)}</td>
+                  <td className="py-3 pe-3 text-end tabular-nums text-stone-600">{f.money(line.unitPrice)}</td>
+                  <td className="py-3 text-end font-medium tabular-nums">{f.money(line.subtotal)}</td>
                 </tr>
               ))}
             </tbody>
@@ -142,12 +135,12 @@ export default async function InvoicePage({
 
           <div className="mt-5 flex items-end justify-between gap-4">
             <p className="text-xs text-stone-500 tabular-nums">
-              {units} item{units === 1 ? "" : "s"}
+              {n(t.units, units)}
             </p>
             <div className="text-end">
-              <p className="text-xs uppercase tracking-[0.12em] text-stone-500">Total</p>
+              <p className="text-xs uppercase tracking-[0.12em] text-stone-500">{t.invoice.total}</p>
               <p className="mt-1 text-3xl font-semibold tracking-tight tabular-nums text-green-800">
-                {invoice.totalAmount.toFixed(2)}
+                {f.money(invoice.totalAmount)}
               </p>
             </div>
           </div>
@@ -155,11 +148,13 @@ export default async function InvoicePage({
           <DiamondRule />
 
           <footer className="text-center">
+            {/* The Arabic thanks is part of the brand and always shown; English
+                receipts add a translation underneath. */}
             <p lang="ar" dir="rtl" className="text-base font-medium text-green-800">
               شكراً لزيارتكم
             </p>
-            <p className="mt-1 text-xs text-stone-500">Thank you for your visit</p>
-            <p className="mt-4 text-[11px] text-stone-400">Served by {invoice.createdBy.username}</p>
+            {locale !== "ar" && <p className="mt-1 text-xs text-stone-500">{t.invoice.thanks}</p>}
+            <p className="mt-4 text-[11px] text-stone-400">{fill(t.invoice.servedBy, { name: invoice.createdBy.username })}</p>
           </footer>
         </article>
       </div>

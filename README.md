@@ -44,6 +44,27 @@ employees on the New Sale screen. Change the seed password from **Users** after 
 
 Production: `npm run build` then `npm start`.
 
+## Languages
+
+The app is bilingual, **Arabic by default** (right-to-left) with English as an option. The
+العربية / English switch is in the top bar and on the login page; the choice is stored per device
+in the `pos-locale` cookie, so the server renders the right language and direction with no flash.
+Receipts print in the language the cashier is using.
+
+- **All text lives in two files:** [`src/i18n/dictionaries/ar.ts`](src/i18n/dictionaries/ar.ts) and
+  [`en.ts`](src/i18n/dictionaries/en.ts). To change a word, edit it there; it changes everywhere.
+  The two files must have exactly the same keys, or the build fails, so nothing can go missing.
+- **Using it:** server components and API routes call `const { t, f, n } = await getI18n()`;
+  client components call `useI18n()`. `t` is the dictionary, `f` formats money and dates, and `n`
+  picks the right plural (Arabic has six forms: صنف واحد، صنفان، 3 أصناف، 11 صنفاً…).
+- **Numbers** use Western digits in both languages (prices, barcodes, phone numbers); dates use
+  Levantine month names in Arabic (تشرين الأول).
+- **Right-to-left layout:** use logical classes (`ms-`, `pe-`, `start-`, `text-end`,
+  `border-s`…), never `ml-`/`pr-`/`left-`/`text-right`. Directional icons in buttons flip
+  automatically (`rtlFlip` in `src/components/ui/directional.ts`).
+- **Not translated:** shop data (item, category, customer, supplier names) stays exactly as typed.
+- **Wording rule:** no hyphens, dashes or middle dots in visible text, in either language.
+
 ## Visual identity
 
 Everything is derived from the shop sign: deep green kufic lettering on a limestone wall, lit

@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getI18n } from "@/i18n/server";
+import { fill } from "@/i18n/plural";
 import { prisma } from "@/lib/prisma";
 import { requireApiRole } from "@/lib/auth";
 import { hashPassword, USERNAME_PATTERN, MIN_PASSWORD_LENGTH } from "@/lib/password";
@@ -16,6 +18,7 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
+  const { t } = await getI18n();
   const auth = await requireApiRole("ADMIN");
   if ("error" in auth) return auth.error;
 
@@ -25,17 +28,17 @@ export async function POST(request: NextRequest) {
   const password = typeof body?.password === "string" ? body.password : "";
 
   if (!name) {
-    return NextResponse.json({ error: "Name is required" }, { status: 400 });
+    return NextResponse.json({ error: t.errors.nameRequired }, { status: 400 });
   }
   if (!USERNAME_PATTERN.test(username)) {
     return NextResponse.json(
-      { error: "Username must be 3-30 characters: letters, numbers, dots, underscores, or hyphens" },
+      { error: t.errors.usernameInvalid },
       { status: 400 }
     );
   }
   if (password.length < MIN_PASSWORD_LENGTH) {
     return NextResponse.json(
-      { error: `Password must be at least ${MIN_PASSWORD_LENGTH} characters` },
+      { error: fill(t.errors.passwordTooShort, { n: MIN_PASSWORD_LENGTH }) },
       { status: 400 }
     );
   }
@@ -51,7 +54,7 @@ export async function POST(request: NextRequest) {
     );
   } catch (e) {
     if (isUniqueConstraintError(e)) {
-      return NextResponse.json({ error: "That username is already taken" }, { status: 409 });
+      return NextResponse.json({ error: t.errors.usernameTaken }, { status: 409 });
     }
     throw e;
   }

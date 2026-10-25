@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getI18n } from "@/i18n/server";
 import { prisma } from "@/lib/prisma";
 import { requireApiRole } from "@/lib/auth";
 
@@ -17,6 +18,7 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  const { t } = await getI18n();
   const auth = await requireApiRole("ADMIN", "EMPLOYEE");
   if ("error" in auth) return auth.error;
 
@@ -25,7 +27,7 @@ export async function POST(request: NextRequest) {
   const phone = typeof body?.phone === "string" ? body.phone.trim() : "";
 
   if (!name || !phone) {
-    return NextResponse.json({ error: "Name and phone are required" }, { status: 400 });
+    return NextResponse.json({ error: t.errors.nameAndPhoneRequired }, { status: 400 });
   }
 
   const customer = await prisma.customer.create({ data: { name, phone } });
