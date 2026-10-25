@@ -43,3 +43,7 @@ next-env.d.ts
 # local sqlite database
 /prisma/*.db
 /prisma/*.db-journal
+
+# shop PC: nightly database backups and server logs
+/backups/
+/logs/

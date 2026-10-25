@@ -42,7 +42,8 @@ npm run dev
 Open http://localhost:3000 and sign in with the seed admin. Admins land on the dashboard,
 employees on the New Sale screen. Change the seed password from **Users** after the first login.
 
-Production: `npm run build` then `npm start`.
+Production: `npm run build` then `npm start`. To run it on a PC in the shop for the tills,
+follow **[DEPLOY.md](DEPLOY.md)**: a one-time setup script, start at boot and nightly backups.
 
 ## Languages
 

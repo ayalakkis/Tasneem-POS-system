@@ -9,7 +9,9 @@
     "lint": "eslint",
     "db:seed": "tsx prisma/seed.ts",
     "db:seed-demo": "tsx prisma/seed-demo.ts",
-    "check:money": "tsx scripts/check-money.ts"
+    "check:money": "tsx scripts/check-money.ts",
+    "start:shop": "next start --hostname 0.0.0.0 --port 3000",
+    "backup": "tsx scripts/backup-db.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
