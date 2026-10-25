@@ -166,9 +166,10 @@ if ($SkipSystem) {
 }
 
 # Done ---------------------------------------------------------------------
-$ips = Get-NetIPAddress -AddressFamily IPv4 -ErrorAction SilentlyContinue |
-  Where-Object { $_.IPAddress -notlike "127.*" -and $_.IPAddress -notlike "169.254.*" } |
-  Select-Object -ExpandProperty IPAddress
+# Only real connections (with a router), not virtual adapters the tills can't reach.
+$ips = Get-NetIPConfiguration -ErrorAction SilentlyContinue |
+  Where-Object { $_.IPv4DefaultGateway -and $_.NetAdapter.Status -eq "Up" } |
+  ForEach-Object { $_.IPv4Address.IPAddress }
 Write-Host ""
 Write-Host "Setup complete." -ForegroundColor Green
 Write-Host "Open the POS on the tills and phones (same Wi-Fi) at:"

@@ -40,8 +40,24 @@ cd C:\
 git clone https://github.com/ayalakkis/Tasneem-POS-system.git TasneemPOS
 ```
 
-The repository is private, so a GitHub sign-in window opens the first time. Sign in with the
-account that owns the repository.
+The repository is private, so a **Connect to GitHub** window opens the first time:
+
+1. Click **Sign in with your browser**.
+2. Sign in to GitHub as the account that owns the repository.
+3. Click **Authorize Git Credential Manager**, then go back to PowerShell. The download finishes
+   in a few seconds and creates `C:\TasneemPOS`.
+
+Windows remembers this, so updates won't ask again.
+
+> **Shared shop PC?** That sign-in gives the PC access to the *whole* GitHub account. If staff
+> also use this Windows account, use a limited key instead: on GitHub go to **Settings >
+> Developer settings > Personal access tokens > Fine-grained tokens > Generate new token**,
+> choose **Only select repositories > Tasneem-POS-system**, and give **Contents: Read-only**.
+> When Git asks for a password, paste that token. It can only read this one repository.
+>
+> **No Git at all?** On the repository page click **Code > Download ZIP** and extract it to
+> `C:\TasneemPOS`. The setup works the same, but each update means downloading a new ZIP
+> instead of running the update script.
 
 > Keep the POS in `C:\TasneemPOS`, not on the Desktop or in a OneDrive folder: cloud sync can
 > lock the database file while the shop is using it.
