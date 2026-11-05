@@ -1,124 +1,91 @@
 # Point of Sale
 
-A point-of-sale web app for a small shop selling prayer items, books, clothing and perfumes.
-Admins manage the catalog, stock, customers, deliveries and staff and see profit; employees use
-the POS screens only and never see cost or profit.
+A bilingual (Arabic and English) point-of-sale web application for a small retail shop selling prayer items, books, clothing and perfumes. Administrators manage the catalog, stock, customers, deliveries and staff and can see profit. Employees use the POS screens only and never see cost or profit.
 
-Next.js (App Router) · Prisma 6 + SQLite · Tailwind CSS 4 · iron-session auth.
+## Tech stack
 
-## Running it
+| Area | Technology |
+|---|---|
+| Framework | Next.js (App Router) |
+| Database | Prisma 6 with SQLite |
+| Styling | Tailwind CSS 4 |
+| Authentication | iron-session |
+| Language | TypeScript |
 
-**1. Install**
+## Features
 
-```bash
-npm install
-```
+- Role-based access: admin dashboard with profit reporting, and a restricted employee POS flow
+- Catalog, categories, stock, purchases, customers, suppliers, deliveries and user management
+- Receipt and invoice printing in the cashier’s current language
+- Arabic (right-to-left, default) and English, with a per-device language switch
+- Light, dark and system themes, with no flash on load
+- Accessible design: text colors meet WCAG AA contrast in both themes, and motion is reduced when the OS requests it
+- Shop PC deployment with a one-time setup script, start at boot and nightly backups (see [DEPLOY.md](DEPLOY.md))
 
-**2. Configure** — create `.env` in the project root:
+## Getting started
 
-```
-DATABASE_URL="file:./dev.db"
-SESSION_SECRET="<at least 32 random characters>"
-SEED_ADMIN_USERNAME="admin"
-SEED_ADMIN_PASSWORD="<choose one>"
-```
+1. Install dependencies:
 
-**3. Create the database and the first admin**
+   ```bash
+   npm install
+   ```
 
-```bash
-npx prisma migrate dev
-```
+2. Create a `.env` file in the project root:
 
-```bash
-npm run db:seed
-```
+   ```
+   DATABASE_URL="file:./dev.db"
+   SESSION_SECRET="<at least 32 random characters>"
+   SEED_ADMIN_USERNAME="admin"
+   SEED_ADMIN_PASSWORD="<choose one>"
+   ```
 
-**4. Start**
+3. Create the database and the first admin account:
 
-```bash
-npm run dev
-```
+   ```bash
+   npx prisma migrate dev
+   npm run db:seed
+   ```
 
-Open http://localhost:3000 and sign in with the seed admin. Admins land on the dashboard,
-employees on the New Sale screen. Change the seed password from **Users** after the first login.
+4. Start the development server:
 
-Production: `npm run build` then `npm start`. To run it on a PC in the shop for the tills,
-follow **[DEPLOY.md](DEPLOY.md)**: a one-time setup script, start at boot and nightly backups.
+   ```bash
+   npm run dev
+   ```
 
-## Languages
+Open `http://localhost:3000` and sign in with the seeded admin account. Admins land on the dashboard and employees on the New Sale screen. Change the seed password from the Users page after the first sign-in.
 
-The app is bilingual, **Arabic by default** (right-to-left) with English as an option. The
-العربية / English switch is in the top bar and on the login page; the choice is stored per device
-in the `pos-locale` cookie, so the server renders the right language and direction with no flash.
-Receipts print in the language the cashier is using.
+For production, run `npm run build` followed by `npm start`. To run on a PC in the shop, follow [DEPLOY.md](DEPLOY.md).
 
-- **All text lives in two files:** [`src/i18n/dictionaries/ar.ts`](src/i18n/dictionaries/ar.ts) and
-  [`en.ts`](src/i18n/dictionaries/en.ts). To change a word, edit it there; it changes everywhere.
-  The two files must have exactly the same keys, or the build fails, so nothing can go missing.
-- **Using it:** server components and API routes call `const { t, f, n } = await getI18n()`;
-  client components call `useI18n()`. `t` is the dictionary, `f` formats money and dates, and `n`
-  picks the right plural (Arabic has six forms: صنف واحد، صنفان، 3 أصناف، 11 صنفاً…).
-- **Numbers** use Western digits in both languages (prices, barcodes, phone numbers); dates use
-  Levantine month names in Arabic (تشرين الأول).
-- **Right-to-left layout:** use logical classes (`ms-`, `pe-`, `start-`, `text-end`,
-  `border-s`…), never `ml-`/`pr-`/`left-`/`text-right`. Directional icons in buttons flip
-  automatically (`rtlFlip` in `src/components/ui/directional.ts`).
-- **Not translated:** shop data (item, category, customer, supplier names) stays exactly as typed.
-- **Wording rule:** no hyphens, dashes or middle dots in visible text, in either language.
+## Internationalization
 
-## Visual identity
+Arabic is the default language (right-to-left) with English as an option. The language is stored per device in a cookie, so the server renders the correct language and direction on the first paint. Receipts print in the language the cashier is using.
 
-Everything is derived from the shop sign: deep green kufic lettering on a limestone wall, lit
-from behind by a warm brass glow.
-
-| Role | Light | Dark | Use |
-|---|---|---|---|
-| Primary (green) | `#1f4e43` | `#5fa88e` | Primary actions, active states, the logo |
-| Background (stone) | `#f3efe7` | `#0c1412` | Page background |
-| Surface | `#fffdf9` | `#121d1a` | Cards, tables, inputs |
-| Accent (brass) | `#b97f31` | `#d9a65a` | Focus ring, diamond markers, "warning" tone |
-| Sidebar | `#173b33` | `#0e1916` | App frame |
-
-- **Font:** Readex Pro (Latin + Arabic), loaded with `next/font`. Numbers use tabular figures.
-- **Logo:** [`LogoMark`](src/components/brand/Logo.tsx) is the sign redrawn on a 10-unit grid as a
-  single SVG path. It takes `currentColor`. The browser icon is [`src/app/icon.svg`](src/app/icon.svg).
-- **Motifs:** the logo's diamond (`Diamond`) marks the current page and section labels; its arch
-  (`ArchFrame`) frames empty states, the login panel and the 404 page — see
-  [`Motifs.tsx`](src/components/brand/Motifs.tsx).
-- **Themes:** System / Light / Dark from the toggle in the top bar, stored in the `pos-theme`
-  cookie so the server renders the right theme with no flash. Invoices always print on white.
-- **Accessibility:** all text tokens meet WCAG AA (4.5:1) on every surface in both themes;
-  chart colors are validated for lightness, chroma and colorblind separation; motion is reduced
-  when the OS asks for it.
+- All interface text lives in `src/i18n/dictionaries/ar.ts` and `en.ts`. The two files must contain identical keys, otherwise the build fails.
+- Server components and API routes use `getI18n()`; client components use `useI18n()`. Helpers format money, dates and Arabic plural forms.
+- Layouts use logical CSS classes (`ms-`, `pe-`, `start-`, `text-end`) so they mirror correctly in right-to-left mode.
+- Shop data such as item, category and customer names is displayed exactly as entered.
 
 ## Design system
 
-All tokens live in [`src/app/globals.css`](src/app/globals.css). Components use **semantic**
-names, never raw colors, so dark mode needs no per-screen work:
+The visual identity is derived from the shop sign: deep green lettering on a limestone wall with a warm brass accent.
+
+| Role | Light | Dark |
+|---|---|---|
+| Primary (green) | `#1f4e43` | `#5fa88e` |
+| Background (stone) | `#f3efe7` | `#0c1412` |
+| Surface | `#fffdf9` | `#121d1a` |
+| Accent (brass) | `#b97f31` | `#d9a65a` |
+
+Typography uses Readex Pro for both Latin and Arabic text. Design tokens live in `src/app/globals.css` and components use semantic color names instead of raw values, so dark mode needs no per-screen work.
+
+Shared components are in `src/components/ui`, including Button, Input, Select, Field, Card, Table, Badge, PageHeader, EmptyState, Alert and ConfirmDialog, plus StatCard, AppShell and chart components. In development, `/admin/ui-kit` shows every component in the current theme.
+
+## Project structure
 
 ```
-bg-bg  bg-surface  bg-surface-2  border-border  text-fg  text-fg-muted  text-fg-subtle
-bg-primary  text-primary-fg  bg-primary-soft  bg-accent-soft  bg-danger  bg-info-soft  …
+prisma/          database schema, migrations and seed data
+scripts/         shop PC setup, update and backup scripts
+src/app/         pages and API routes (Next.js App Router)
+src/components/  shared UI, POS and chart components
+src/i18n/        Arabic and English dictionaries and helpers
 ```
-
-Shared components are in [`src/components/ui`](src/components/ui) — import from
-`@/components/ui`:
-
-| Component | For |
-|---|---|
-| `Button`, `LinkButton` | Actions. Variants `primary` `secondary` `ghost` `danger` `danger-ghost`; sizes `sm` `md` `lg`; `icon`, `iconOnly`, `loading` |
-| `Input`, `Select`, `Textarea`, `Field` | Forms. `Field` adds the label, hint, error and "Optional" tag |
-| `Card`, `CardHeader`, `CardBody`, `CardFooter` | Grouped content |
-| `Table`, `THead`, `TBody`, `TR`, `TH`, `TD`, `TableEmpty` | Data tables. `numeric` right-aligns with tabular figures |
-| `Badge` | Status pills. Tones `neutral` `primary` `accent` `danger` `info` |
-| `PageHeader` | Eyebrow, title, description and actions at the top of every page |
-| `EmptyState` | Empty lists |
-| `Alert` | Inline messages (`danger` `warning` `success` `info`) |
-| `ConfirmDialog` | Confirming destructive actions. Throw from `onConfirm` to show an error |
-
-Also: `StatCard` (KPI tiles, `hero` for the one number that matters most), `AppShell`
-(sidebar + top bar + drawer on small screens) and the chart components in
-`src/components/charts`.
-
-In development, **`/admin/ui-kit`** shows every component and chart in the current theme
-(it returns 404 in production).
